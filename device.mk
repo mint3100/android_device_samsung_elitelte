@@ -30,7 +30,6 @@ PRODUCT_SYSTEM_DEFAULT_PROPERTIES += \
 PRODUCT_COPY_FILES += \
     $(DEVICE_PATH)/rootdir/adb_keys:root/adb_keys \
     $(DEVICE_PATH)/rootdir/fstab.qcom:root/fstab.qcom \
-    $(DEVICE_PATH)/rootdir/init.codex_bootlog.sh:root/init.codex_bootlog.sh \
     $(DEVICE_PATH)/rootdir/init.carrier.rc:root/init.carrier.rc \
     $(DEVICE_PATH)/rootdir/init.class_main.sh:root/init.class_main.sh \
     $(DEVICE_PATH)/rootdir/init.container.rc:root/init.container.rc \

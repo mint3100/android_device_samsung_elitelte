@@ -43,16 +43,12 @@ on fs
     wait /dev/block/bootdevice
     wait /dev/block/bootdevice/by-name/cache
     mount ext4 /dev/block/bootdevice/by-name/cache /cache nosuid nodev barrier=1
-    mkdir /cache/codex_bootlog 0777 root root
-    write /cache/codex_bootlog/00-before-mount-all before-mount-all
 
     mount_all fstab.qcom
-    write /cache/codex_bootlog/01-after-mount-all after-mount-all
     write /proc/sys/vm/swappiness 100
 
     # Keep the remaining firmware/persist partitions outside fstab; a missing
     # optional partition should not block Android's fs action.
-    start codex-bootlog-fs
 
     wait /dev/block/bootdevice/by-name/persist
     mount ext4 /dev/block/bootdevice/by-name/persist /persist nosuid nodev barrier=1
@@ -76,16 +72,9 @@ on fs
     mount vfat /dev/block/bootdevice/by-name/modem /firmware-modem ro context=u:object_r:firmware_file:s0,shortname=lower,uid=1000,gid=1000,dmask=227,fmask=337
     #write /sys/kernel/boot_adsp/boot 1
 
-    write /cache/codex_bootlog/02-after-firmware-mounts after-firmware-mounts
-    start codex-bootlog-firmware
-
     rm -rf /efs/dmverity
 
 on post-fs-data
-    mkdir /cache/codex_bootlog 0777 root root
-    write /cache/codex_bootlog/03-post-fs-data post-fs-data
-    start codex-bootlog-post-fs-data
-
     mkdir /data/tombstones 0771 system system
     mkdir /tombstones/modem 0771 system system
     mkdir /tombstones/lpass 0771 system system
@@ -188,10 +177,6 @@ service audiod /system/bin/audiod
    group system
 
 on boot
-    mkdir /cache/codex_bootlog 0777 root root
-    write /cache/codex_bootlog/04-boot boot
-    start codex-bootlog-boot
-
     start rmt_storage
     insmod /system/lib/modules/adsprpc.ko
 # access permission for secure touch
@@ -371,31 +356,3 @@ on property:ro.securestorage.knox=true
     chown system system /dev/.secure_storage
     restorecon -R /dev/.secure_storage
     start secure_storage
-
-service codex-bootlog-fs /system/bin/sh /init.codex_bootlog.sh fs
-    class core
-    user root
-    group root
-    disabled
-    oneshot
-
-service codex-bootlog-firmware /system/bin/sh /init.codex_bootlog.sh firmware
-    class core
-    user root
-    group root
-    disabled
-    oneshot
-
-service codex-bootlog-post-fs-data /system/bin/sh /init.codex_bootlog.sh post-fs-data
-    class core
-    user root
-    group root
-    disabled
-    oneshot
-
-service codex-bootlog-boot /system/bin/sh /init.codex_bootlog.sh boot
-    class core
-    user root
-    group root
-    disabled
-    oneshot

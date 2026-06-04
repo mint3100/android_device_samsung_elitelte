@@ -14,7 +14,7 @@ This tree is part of an Android 8.1 bring-up for a 32-bit ARM LineageOS build. I
 | Platform | Qualcomm MSM8937 / MSM8917 family |
 | Android target | LineageOS 15.1 / Android 8.1 |
 | Architecture | 32-bit ARM (`armeabi-v7a`) |
-| Kernel image | Source-built `zImage` |
+| Kernel image | Source-built `zImage-dtb` |
 | Vendor path | `vendor/samsung/elitelte_kor` |
 | Kernel path | `kernel/samsung/msm8917_elitelte_kor` |
 
@@ -23,7 +23,7 @@ This tree is part of an Android 8.1 bring-up for a 32-bit ARM LineageOS build. I
 - Lineage product target: `lineage_elitelte_kor`.
 - Board configuration for a 32-bit ARM userspace and kernel.
 - Source-built kernel integration through `TARGET_KERNEL_SOURCE`.
-- Samsung boot image handling with separated `dt.img` and `SEANDROIDENFORCE` trailer.
+- Standard LineageOS boot image generation with a source-built `zImage-dtb`.
 - Legacy boot ramdisk configuration for Android 8.1.
 - Device init scripts, fstab files, USB configuration, recovery fstab, and root mount points.
 - Vendor inheritance for proprietary files under `vendor/samsung/elitelte_kor`.
@@ -70,7 +70,7 @@ mka recoveryimage
 - This tree is for the Korean `elitelte_kor` target, not the Chinese `elitelte` variants.
 - The intended ROM target is 32-bit LineageOS 15.1.
 - The kernel is built from source; this tree is not designed around a prebuilt kernel.
-- The boot image uses the standard LineageOS build flow, with only Samsung-specific boot image requirements layered in through `custom_bootimg.mk`.
+- The boot image uses the standard LineageOS build flow; no prebuilt kernel or custom boot image makefile is used.
 - The device is still under bring-up. Treat boot, radio, camera, audio, and power behavior as active validation areas.
 
 ## Related Repositories

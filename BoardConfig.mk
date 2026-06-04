@@ -25,13 +25,11 @@ TARGET_COPY_OUT_VENDOR := system/vendor
 # before /system is mounted.
 BOARD_PROPERTY_OVERRIDES_SPLIT_ENABLED := false
 
-BOARD_KERNEL_IMAGE_NAME := zImage
+BOARD_KERNEL_IMAGE_NAME := zImage-dtb
 BOARD_KERNEL_BASE := 0x80000000
 BOARD_KERNEL_PAGESIZE := 2048
 BOARD_KERNEL_CMDLINE := console=null androidboot.hardware=qcom user_debug=23 msm_rtb.filter=0x237 ehci-hcd.park=3 androidboot.bootdevice=7824900.sdhci androidboot.selinux=permissive
 BOARD_MKBOOTIMG_ARGS := --kernel_offset 0x00008000 --ramdisk_offset 0x02000000 --tags_offset 0x01e00000 --board SRPPL28A000
-BOARD_KERNEL_SEPARATED_DT := true
-BOARD_CUSTOM_BOOTIMG_MK := $(LOCAL_PATH)/custom_bootimg.mk
 BOARD_ROOT_EXTRA_FOLDERS := firmware firmware-modem efs persist dsp preload oem
 
 BOARD_BOOTIMAGE_PARTITION_SIZE := 16777216
