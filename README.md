@@ -1,43 +1,83 @@
-# Samsung Galaxy Folder2 SM-G160N TWRP device tree
+# android_device_samsung_elitelte_kor
 
-Device tree for building 64-bit TWRP for the Korean Samsung Galaxy Folder2.
+LineageOS 15.1 device tree for the Korean Samsung Galaxy Folder2 (`elitelte_kor`, SM-G160N).
 
-- Device: Samsung Galaxy Folder2
-- Model: SM-G160N
-- Codename: `eliteltekor` / `elitelte_kor`
-- Platform: Qualcomm MSM8937/MSM8917 family
-- Recovery target: TWRP 3.1.1 / Android 7.1 tree
-- Architecture: arm64 recovery with 32-bit secondary arch
+This tree is part of an Android 8.1 bring-up for a 32-bit ARM LineageOS build. It describes the board, product, boot image layout, ramdisk files, recovery fstab, and device-side init configuration used by the ROM build.
 
-## Checkout
+## Device Summary
 
-Clone this repository into the TWRP source tree at:
+| Item | Value |
+| --- | --- |
+| Device | Samsung Galaxy Folder2 |
+| Model | SM-G160N |
+| Codename | `elitelte_kor` |
+| Platform | Qualcomm MSM8937 / MSM8917 family |
+| Android target | LineageOS 15.1 / Android 8.1 |
+| Architecture | 32-bit ARM (`armeabi-v7a`) |
+| Kernel image | Source-built `zImage` |
+| Vendor path | `vendor/samsung/elitelte_kor` |
+| Kernel path | `kernel/samsung/msm8917_elitelte_kor` |
 
-```sh
-device/samsung/eliteltekor
+## What This Tree Provides
+
+- Lineage product target: `lineage_elitelte_kor`.
+- Board configuration for a 32-bit ARM userspace and kernel.
+- Source-built kernel integration through `TARGET_KERNEL_SOURCE`.
+- Samsung boot image handling with separated `dt.img` and `SEANDROIDENFORCE` trailer.
+- Legacy boot ramdisk configuration for Android 8.1.
+- Device init scripts, fstab files, USB configuration, recovery fstab, and root mount points.
+- Vendor inheritance for proprietary files under `vendor/samsung/elitelte_kor`.
+
+## Expected Source Layout
+
+Place the three device-specific repositories under a LineageOS 15.1 source tree like this:
+
+```text
+device/samsung/elitelte_kor
+vendor/samsung/elitelte_kor
+kernel/samsung/msm8917_elitelte_kor
 ```
 
 ## Build
 
+From the root of the LineageOS 15.1 source tree:
+
 ```sh
 source build/envsetup.sh
-lunch omni_eliteltekor-userdebug
+lunch lineage_elitelte_kor-userdebug
 make clean
-make -j$(nproc) recoveryimage
+mka bacon
 ```
 
-## Included prebuilts
+For boot image testing only:
 
-This tree includes the required recovery kernel and QCDT image under
-`prebuilt/`.
+```sh
+source build/envsetup.sh
+lunch lineage_elitelte_kor-userdebug
+mka bootimage
+```
 
-- `prebuilt/kernel`: 64-bit `Image.gz`
-- `prebuilt/qcdt.img`: QCDT matched to the known-working recovery header
+For recovery image testing only:
 
-No separate device-specific proprietary vendor tree is required for this
-minimal TWRP recovery build.
+```sh
+source build/envsetup.sh
+lunch lineage_elitelte_kor-userdebug
+mka recoveryimage
+```
 
-## Known-good recovery header
+## Bring-up Notes
 
-The board name, cmdline, QCDT, and `SEANDROIDENFORCE` trailer are matched to a
-known-working temporary port for SM-G160N.
+- This tree is for the Korean `elitelte_kor` target, not the Chinese `elitelte` variants.
+- The intended ROM target is 32-bit LineageOS 15.1.
+- The kernel is built from source; this tree is not designed around a prebuilt kernel.
+- The boot image uses the standard LineageOS build flow, with only Samsung-specific boot image requirements layered in through `custom_bootimg.mk`.
+- The device is still under bring-up. Treat boot, radio, camera, audio, and power behavior as active validation areas.
+
+## Related Repositories
+
+- `android_vendor_samsung_elitelte_kor`
+- `android_kernel_samsung_msm8917_elitelte_kor`
+
+## Branch
+
+Use the `lineage-15.1` branch for Android 8.1 work.
