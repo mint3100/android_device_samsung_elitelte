@@ -1,0 +1,55 @@
+DEVICE_PATH := device/samsung/elitelte_kor
+LOCAL_PATH := $(DEVICE_PATH)
+
+TARGET_NO_BOOTLOADER := true
+TARGET_BOARD_PLATFORM := msm8937
+TARGET_BOOTLOADER_BOARD_NAME := msm8937
+TARGET_OTA_ASSERT_DEVICE := elitelte_kor,eliteltekor,eliteltekx,SM-G160N
+
+TARGET_ARCH := arm
+TARGET_ARCH_VARIANT := armv7-a-neon
+TARGET_CPU_ABI := armeabi-v7a
+TARGET_CPU_ABI2 := armeabi
+TARGET_CPU_VARIANT := cortex-a53
+
+TARGET_KERNEL_ARCH := arm
+TARGET_KERNEL_SOURCE := kernel/samsung/msm8917_elitelte_kor
+TARGET_KERNEL_CONFIG := msm8937_sec_defconfig
+TARGET_KERNEL_VARIANT_CONFIG := msm8937_sec_elitelte_kor_defconfig
+TARGET_KERNEL_SELINUX_CONFIG := selinux_defconfig
+TARGET_KERNEL_CROSS_COMPILE_PREFIX := arm-eabi-
+KERNEL_TOOLCHAIN := $(ANDROID_BUILD_TOP)/prebuilts/gcc/linux-x86/arm/arm-eabi-4.8/bin
+TARGET_COPY_OUT_VENDOR := system/vendor
+# elitelte_kor boots from a legacy ramdisk, not system-as-root.  Keep a real
+# /default.prop in the boot ramdisk so second-stage init has default props
+# before /system is mounted.
+BOARD_PROPERTY_OVERRIDES_SPLIT_ENABLED := false
+
+BOARD_KERNEL_IMAGE_NAME := zImage
+BOARD_KERNEL_BASE := 0x80000000
+BOARD_KERNEL_PAGESIZE := 2048
+BOARD_KERNEL_CMDLINE := console=null androidboot.hardware=qcom user_debug=23 msm_rtb.filter=0x237 ehci-hcd.park=3 androidboot.bootdevice=7824900.sdhci androidboot.selinux=permissive
+BOARD_MKBOOTIMG_ARGS := --kernel_offset 0x00008000 --ramdisk_offset 0x02000000 --tags_offset 0x01e00000 --board SRPPL28A000
+BOARD_KERNEL_SEPARATED_DT := true
+BOARD_CUSTOM_BOOTIMG_MK := $(LOCAL_PATH)/custom_bootimg.mk
+BOARD_ROOT_EXTRA_FOLDERS := firmware firmware-modem efs persist dsp preload oem
+
+BOARD_BOOTIMAGE_PARTITION_SIZE := 16777216
+BOARD_RECOVERYIMAGE_PARTITION_SIZE := 16777216
+BOARD_SYSTEMIMAGE_PARTITION_SIZE := 2147483648
+BOARD_USERDATAIMAGE_PARTITION_SIZE := 4294967296
+BOARD_CACHEIMAGE_PARTITION_SIZE := 268435456
+BOARD_FLASH_BLOCK_SIZE := 131072
+
+BOARD_SYSTEMIMAGE_FILE_SYSTEM_TYPE := ext4
+BOARD_CACHEIMAGE_FILE_SYSTEM_TYPE := ext4
+BOARD_USERDATAIMAGE_FILE_SYSTEM_TYPE := ext4
+TARGET_USERIMAGES_USE_EXT4 := true
+TARGET_USERIMAGES_USE_F2FS := true
+
+TARGET_RECOVERY_FSTAB := $(DEVICE_PATH)/recovery.fstab
+RECOVERY_SDCARD_ON_DATA := true
+TARGET_RECOVERY_PIXEL_FORMAT := RGBX_8888
+TARGET_SCREEN_WIDTH := 480
+TARGET_SCREEN_HEIGHT := 800
+BOARD_HAS_NO_SELECT_BUTTON := true

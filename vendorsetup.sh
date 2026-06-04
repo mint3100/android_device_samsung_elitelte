@@ -1,0 +1,2 @@
+add_lunch_combo lineage_elitelte_kor-userdebug
+add_lunch_combo lineage_elitelte_kor-eng
