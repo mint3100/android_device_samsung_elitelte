@@ -24,6 +24,8 @@ This tree is part of an Android 8.1 bring-up for a 32-bit ARM LineageOS build. I
 - Board configuration for a 32-bit ARM userspace and kernel.
 - Source-built kernel integration through `TARGET_KERNEL_SOURCE`.
 - Standard LineageOS boot image generation with a source-built `zImage-dtb`.
+- Qualcomm/Samsung hardware feature flags for Bluetooth, camera, and Wi-Fi.
+- Android feature permission XMLs and core Wi-Fi/camera package declarations.
 - Legacy boot ramdisk configuration for Android 8.1.
 - Device init scripts, fstab files, USB configuration, recovery fstab, and root mount points.
 - Vendor inheritance for proprietary files under `vendor/samsung/elitelte_kor`.
