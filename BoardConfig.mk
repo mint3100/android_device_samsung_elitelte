@@ -20,10 +20,19 @@ TARGET_KERNEL_SELINUX_CONFIG := selinux_defconfig
 TARGET_KERNEL_CROSS_COMPILE_PREFIX := arm-eabi-
 KERNEL_TOOLCHAIN := $(ANDROID_BUILD_TOP)/prebuilts/gcc/linux-x86/arm/arm-eabi-4.8/bin
 TARGET_COPY_OUT_VENDOR := system/vendor
+DEVICE_MANIFEST_FILE := $(DEVICE_PATH)/manifest.xml
 # elitelte_kor boots from a legacy ramdisk, not system-as-root.  Keep a real
 # /default.prop in the boot ramdisk so second-stage init has default props
 # before /system is mounted.
 BOARD_PROPERTY_OVERRIDES_SPLIT_ENABLED := false
+
+# Qualcomm display HALs are built from the LineageOS 15.1 display source
+# instead of using the Marshmallow stock hwcomposer blob.
+TARGET_USES_ION := true
+TARGET_USES_C2D_COMPOSITION := true
+TARGET_USES_GRALLOC1 := false
+TARGET_USES_HWC2 := false
+MSM_VIDC_TARGET_LIST := msm8937
 
 # Bluetooth
 BOARD_HAVE_BLUETOOTH_QCOM := true
@@ -46,12 +55,15 @@ BOARD_WPA_SUPPLICANT_DRIVER := NL80211
 BOARD_WPA_SUPPLICANT_PRIVATE_LIB := lib_driver_cmd_qcwcn
 BOARD_HAVE_SAMSUNG_WIFI := true
 WPA_SUPPLICANT_VERSION := VER_0_8_X
+WIFI_DRIVER_MODULE_PATH := "/system/vendor/lib/modules/wlan.ko"
+WIFI_DRIVER_MODULE_NAME := "wlan"
+WIFI_DRIVER_MODULE_ARG := "con_mode=5"
 
 BOARD_KERNEL_IMAGE_NAME := zImage
 BOARD_KERNEL_SEPARATED_DT := true
 BOARD_KERNEL_BASE := 0x80000000
 BOARD_KERNEL_PAGESIZE := 2048
-BOARD_KERNEL_CMDLINE := console=null androidboot.hardware=qcom user_debug=23 msm_rtb.filter=0x237 ehci-hcd.park=3 androidboot.bootdevice=7824900.sdhci androidboot.selinux=permissive
+BOARD_KERNEL_CMDLINE := console=null androidboot.hardware=qcom user_debug=23 msm_rtb.filter=0x237 ehci-hcd.park=3 androidboot.bootdevice=7824900.sdhci lpm_levels.sleep_disabled=1 androidboot.selinux=permissive loop.max_part=7 firmware_class.path=/system/etc/firmware
 BOARD_MKBOOTIMG_ARGS := --kernel_offset 0x00008000 --ramdisk_offset 0x02000000 --tags_offset 0x01e00000 --board SRPPL28A000
 BOARD_ROOT_EXTRA_FOLDERS := firmware firmware-modem efs persist dsp preload oem
 
@@ -69,6 +81,7 @@ TARGET_USERIMAGES_USE_EXT4 := true
 TARGET_USERIMAGES_USE_F2FS := true
 
 TARGET_RECOVERY_FSTAB := $(DEVICE_PATH)/recovery.fstab
+BOOTLOADER_MESSAGE_OFFSET := 9438404
 RECOVERY_SDCARD_ON_DATA := true
 TARGET_RECOVERY_PIXEL_FORMAT := RGBX_8888
 TARGET_SCREEN_WIDTH := 480

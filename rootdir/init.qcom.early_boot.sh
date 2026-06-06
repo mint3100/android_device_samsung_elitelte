@@ -143,7 +143,6 @@ case "$target" in
                 setprop ro.sf.lcd_density 160
                 # Liquid do not have hardware navigation keys, so enable
                 # Android sw navigation bar
-                setprop ro.hw.nav_keys 0
                 ;;
             "Dragon")
                 setprop ro.sf.lcd_density 240
@@ -175,13 +174,11 @@ case "$target" in
                 setprop ro.sf.lcd_density 320
                 # Liquid do not have hardware navigation keys, so enable
                 # Android sw navigation bar
-                setprop ro.hw.nav_keys 0
                 ;;
             "SBC")
                 setprop ro.sf.lcd_density 200
                 # SBC do not have hardware navigation keys, so enable
                 # Android sw navigation bar
-                setprop qemu.hw.mainkeys 0
                 ;;
             *)
                 setprop ro.sf.lcd_density 480
@@ -192,7 +189,6 @@ case "$target" in
         case "$soc_hwplatform" in
             "Dragon")
                 setprop ro.sf.lcd_density 240
-                setprop qemu.hw.mainkeys 0
                 ;;
             *)
                 setprop ro.sf.lcd_density 480

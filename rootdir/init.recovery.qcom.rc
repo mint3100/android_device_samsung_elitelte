@@ -1,6 +1,7 @@
 on init
     setprop lineage.service.adb.root 1
     setprop sys.usb.config adb
+    symlink /dev/block/platform/soc/7824900.sdhci /dev/block/bootdevice
 
 on boot
     setprop lineage.service.adb.root 1

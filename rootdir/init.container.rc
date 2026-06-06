@@ -82,12 +82,14 @@ service epmlogd /system/bin/epmlogd
     user system
     group system log shell
     oneshot
+    disabled
 
 service sdp_cryptod /system/bin/sdp_cryptod
     class main
     socket sdp stream 0660 system system
     user system
     group system
+    disabled
 
 # virtual sdcard daemon running as system (1000)
 #service knox /system/bin/sdcard /data/knox/sdcard /mnt/shell/knox-emulated 1000 1000
@@ -100,4 +102,3 @@ service sdp_cryptod /system/bin/sdp_cryptod
 #    oneshot
 
 #    start knox
-

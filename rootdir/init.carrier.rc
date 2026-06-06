@@ -24,7 +24,7 @@ on post-fs-data
     chmod 0771 /data/.dmbca
 
 on early-boot
-    chown bluetooth net_bt_stack /dev/ttyHS0
+    chown bluetooth net_bt /dev/ttyHS0
     chmod 0660 /dev/ttyHS0
 
 on fs
@@ -33,6 +33,7 @@ service dmb /system/bin/dmbserver
     class main
     user media
     group system radio inet misc audio graphics net_bt net_bt_admin sdcard_rw sdcard_r shell media_rw
+    disabled
 
 on boot
 
@@ -61,6 +62,7 @@ service imsd /system/bin/imsd
     socket imsd stream 0660 system system
     user root
     group system radio net_raw inet net_admin
+    disabled
 
 #add tunman
 service tunman /system/bin/tunman
@@ -68,6 +70,7 @@ service tunman /system/bin/tunman
     user system
     group system shell net_admin inet net_raw net_bw_acct
     socket tunman stream 0666 system system
+    disabled
 
 # SSWAP
 service swapon /sbin/sswap -s
@@ -76,12 +79,13 @@ service swapon /sbin/sswap -s
     group root
     seclabel u:r:sswap:s0
     oneshot
+    disabled
 	
 # permissions for bluetooth.
     setprop ro.bt.bdaddr_path "/efs/bluetooth/bt_addr"
-    chown bluetooth net_bt_stack ro.bt.bdaddr_path
-    chown radio net_bt_stack /efs/bluetooth/bt_addr
+    chown bluetooth net_bt ro.bt.bdaddr_path
+    chown radio net_bt /efs/bluetooth/bt_addr
     chmod 0640 /efs/bluetooth/bt_addr
     chmod 0660 /sys/class/rfkill/rfkill0/state
-    chown bluetooth net_bt_stack /sys/class/rfkill/rfkill0/state
-    chown bluetooth net_bt_stack /sys/class/rfkill/rfkill0/type
+    chown bluetooth net_bt /sys/class/rfkill/rfkill0/state
+    chown bluetooth net_bt /sys/class/rfkill/rfkill0/type

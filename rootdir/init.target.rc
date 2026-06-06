@@ -40,15 +40,18 @@ on early-init
 #    export LD_PRELOAD libNimsWrap.so
 
 on fs
-    wait /dev/block/bootdevice
-    wait /dev/block/bootdevice/by-name/cache
-    mount ext4 /dev/block/bootdevice/by-name/cache /cache nosuid nodev barrier=1
+    wait /dev/block/platform/soc/${ro.boot.bootdevice}
+    symlink /dev/block/platform/soc/${ro.boot.bootdevice} /dev/block/bootdevice
 
-    mount_all fstab.qcom
+    mount_all /fstab.qcom
     write /proc/sys/vm/swappiness 100
+    write /sys/module/firmware_class/parameters/path /firmware-modem/image
 
     # Keep the remaining firmware/persist partitions outside fstab; a missing
     # optional partition should not block Android's fs action.
+
+    wait /dev/block/bootdevice/by-name/cache
+    mount ext4 /dev/block/bootdevice/by-name/cache /cache nosuid nodev barrier=1
 
     wait /dev/block/bootdevice/by-name/persist
     mount ext4 /dev/block/bootdevice/by-name/persist /persist nosuid nodev barrier=1
@@ -66,10 +69,10 @@ on fs
     restorecon_recursive   /efs
 
     wait /dev/block/bootdevice/by-name/apnhlos
-    mount vfat /dev/block/bootdevice/by-name/apnhlos /firmware ro context=u:object_r:firmware_file:s0,shortname=lower,uid=1000,gid=1000,dmask=227,fmask=337
+    mount vfat /dev/block/bootdevice/by-name/apnhlos /firmware ro context=u:object_r:system_file:s0,shortname=lower,uid=1000,gid=1000,dmask=227,fmask=337
 
     wait /dev/block/bootdevice/by-name/modem
-    mount vfat /dev/block/bootdevice/by-name/modem /firmware-modem ro context=u:object_r:firmware_file:s0,shortname=lower,uid=1000,gid=1000,dmask=227,fmask=337
+    mount vfat /dev/block/bootdevice/by-name/modem /firmware-modem ro context=u:object_r:system_file:s0,shortname=lower,uid=1000,gid=1000,dmask=227,fmask=337
     #write /sys/kernel/boot_adsp/boot 1
 
     rm -rf /efs/dmverity
@@ -90,6 +93,7 @@ service qcamerasvr /system/bin/mm-qcamera-daemon
     class late_start
     user camera
     group camera system inet input graphics media_rw sdcard_rw
+    disabled
 
 on init
    write /sys/module/qpnp_rtc/parameters/poweron_alarm 1
@@ -98,6 +102,7 @@ service qfp-daemon /system/bin/qfp-daemon
    class late_start
    user system
    group system drmrpc
+   disabled
 
 # Allow usb charging to be disabled peristently
 on property:persist.usb.chgdisabled=1
@@ -110,6 +115,7 @@ service qrngd /system/bin/qrngd -f
    class main
    user root
    group root
+   disabled
 
 service qrngp /system/bin/qrngp -f
    class main
@@ -128,6 +134,7 @@ service qseecomd /system/bin/qseecomd
    class core
    user root
    group root
+   disabled
 
 #service aostlmd /system/bin/aostlmd
 #   class late_start
@@ -157,17 +164,20 @@ service thermal-engine /system/vendor/bin/thermal-engine
    socket thermal-recv-client stream 0660 system system
    socket thermal-recv-passive-client stream 0666 system system
    group root
+   disabled
 
 service time_daemon /system/bin/time_daemon
    class late_start
    user root
    group root
+   disabled
 
 # SecEDS
 service TvoutService_C /system/bin/bintvoutservice
      class main
      user system
      group graphics
+     disabled
 on property:ro.SecEDS.enable=false
     stop TvoutService_C
 
@@ -175,10 +185,13 @@ service audiod /system/bin/audiod
    class late_start
    user system
    group system
+   disabled
 
 on boot
     start rmt_storage
-    insmod /system/lib/modules/adsprpc.ko
+    write /sys/module/firmware_class/parameters/path /firmware/image
+    insmod /system/vendor/lib/modules/wlan.ko con_mode=5
+    start wcnss-service
 # access permission for secure touch
     chmod 0660 /sys/devices/soc.0/78b7000.i2c/i2c-3/3-0020/input/input0/secure_touch_enable
     chmod 0440 /sys/devices/soc.0/78b7000.i2c/i2c-3/3-0020/input/input0/secure_touch
@@ -200,7 +213,7 @@ on property:init.svc.surfaceflinger=stopped
     stop ppd
 
 on property:init.svc.surfaceflinger=running
-    start ppd
+    # ppd is not packaged in the current Lineage bring-up build.
 
 on property:init.svc.surfaceflinger=restarting
     stop ppd
@@ -209,32 +222,44 @@ on property:init.svc.zygote=stopped
     stop ppd
 
 on property:init.svc.zygote=running
-    start ppd
+    # ppd is not packaged in the current Lineage bring-up build.
 
 on property:init.svc.zygote=restarting
     stop ppd
+
+on early-boot
+    setprop sys.usb.configfs 0
+    setprop persist.sys.usb.config adb
+    setprop sys.usb.config adb
+    start adbd
+
+on boot
+    setprop sys.usb.configfs 0
+    setprop persist.sys.usb.config adb
+    setprop sys.usb.config adb
+    start adbd
 
 service wcnss-service /system/bin/wcnss_service
     class main
     user system
     group system wifi radio
     oneshot
+    disabled
 
 on charger
     wait /dev/block/bootdevice/by-name/system
     mount ext4 /dev/block/bootdevice/by-name/system /system ro barrier=1
     load_all_props
-    setprop persist.sys.usb.config mass_storage
     start qcom-post-boot
-    setprop persist.sys.usb.config mass_storage
     start hvdcp_opti
 
 service imsstarter /system/bin/sh /system/etc/init.qti.ims.sh
     class main
     oneshot
+    disabled
 
 on property:vold.decrypt=trigger_restart_framework
-    start imsstarter
+    # IMS startup scripts are not packaged in the current Lineage bring-up build.
 
 service imsqmidaemon /system/bin/imsqmidaemon
     class main
@@ -284,6 +309,7 @@ service dts_configurator /system/bin/dts_configurator
     user system
     group media audio
     oneshot
+    disabled
 
 service dtseagleservice /system/bin/dts_eagle_service
     class late_start
@@ -295,6 +321,7 @@ service adsprpcd /system/bin/adsprpcd
     class main
     user media
     group media
+    disabled
 
 on property:init.svc.dts_configurator=stopped
     start dtseagleservice
@@ -303,12 +330,14 @@ service per_mgr /system/bin/pm-service
     class core
     user system
     group system net_raw
+    disabled
 
 #start gpu_snapshotd for gpu hang issue debugging
 service gpu_snapshotd /system/bin/gpu_snapshotd -s /sys/class/kgsl/kgsl-3d0/snapshot -d /data/log/ -m 0700
     class late_start
     user system
     group system  
+    disabled
  
 service per_proxy /system/bin/pm-proxy
     class core
@@ -326,11 +355,13 @@ service hvdcp_opti /system/bin/hvdcp_opti
     class main
     user root
     group root
+    disabled
 
 service mdtpd /system/vendor/bin/mdtpd
     class late_start
     user root
     group system radio drmrpc
+    disabled
 
 on boot
     write /sys/devices/soc.0/78b8000.i2c/i2c-4/4-0020/input/input0/fw_name PR1702898-s3528t_00260005_00380008.img

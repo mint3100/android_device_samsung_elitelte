@@ -104,10 +104,10 @@ case "$target" in
 	;;
 esac
 
-# check configfs is mounted or not
-if [ -d /config/usb_gadget ]; then
-	setprop sys.usb.configfs 1
-fi
+# This kernel exposes the legacy android_usb gadget. The generic configfs
+# path is partially present, but selecting it leaves init writing to missing
+# /config/usb_gadget/g1 nodes and makes early ADB unreliable.
+setprop sys.usb.configfs 0
 
 # soc_ids for 8937
 if [ -f /sys/devices/soc0/soc_id ]; then

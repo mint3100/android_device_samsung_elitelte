@@ -6,14 +6,29 @@ PRODUCT_CHARACTERISTICS := phone
 
 PRODUCT_PROPERTY_OVERRIDES += \
     ro.hardware=qcom \
+    ro.board.platform=msm8937 \
+    ro.hardware.copybit=msm8937 \
+    ro.hardware.egl=adreno \
+    ro.hardware.gralloc=msm8937 \
+    ro.hardware.hwcomposer=msm8937 \
+    ro.hardware.memtrack=msm8937 \
     ro.sf.lcd_density=240 \
     persist.sys.usb.config=mtp,adb \
-    debug.sf.hw=1 \
-    debug.egl.hw=1 \
+    rild.libpath=/vendor/lib/libsec-ril.so \
+    debug.sf.hw=0 \
+    debug.egl.hw=0 \
+    debug.gralloc.enable_fb_ubwc=1 \
+    debug.sf.latch_unsignaled=1 \
     persist.cne.feature=1 \
     persist.fuse_sdcard=true \
+    persist.sys.sdcardfs=force_off \
+    ro.sys.sdcardfs=false \
+    persist.hwc.enable_vds=1 \
     persist.timed.enable=true \
     persist.hwc.mdpcomp.enable=true \
+    sdm.boot_anim_layer_count=999 \
+    vendor.display.disable_skip_validate=1 \
+    vendor.display.enable_default_color_mode=1 \
     ro.opengles.version=196608 \
     ro.qc.sdk.audio.ssr=false \
     ro.qc.sdk.audio.fluencetype=none
@@ -28,6 +43,38 @@ PRODUCT_SYSTEM_DEFAULT_PROPERTIES += \
     persist.sys.usb.config=adb
 
 PRODUCT_PACKAGES += \
+    android.hardware.configstore@1.1-service \
+    android.hardware.audio@2.0-impl \
+    android.hardware.audio@2.0-service \
+    android.hardware.audio.effect@2.0-impl \
+    audio.a2dp.default \
+    audio.r_submix.default \
+    audio.usb.default \
+    android.hardware.health@1.0-impl \
+    android.hardware.health@1.0-service \
+    android.hardware.gatekeeper@1.0-impl \
+    gatekeeper.qcom \
+    android.hardware.bluetooth@1.0-impl \
+    android.hardware.bluetooth@1.0-service \
+    libbt-vendor \
+    android.hardware.wifi@1.0-service \
+    copybit.msm8937 \
+    gralloc.msm8937 \
+    hwcomposer.msm8937 \
+    android.hardware.graphics.allocator@2.0-impl \
+    android.hardware.graphics.allocator@2.0-service \
+    android.hardware.graphics.mapper@2.0-impl \
+    android.hardware.keymaster@3.0-impl \
+    android.hardware.keymaster@3.0-service \
+    android.hardware.memtrack@1.0-impl \
+    android.hardware.memtrack@1.0-service \
+    libmemalloc \
+    libqdMetaData \
+    libqdutils \
+    libqservice \
+    libsdmcore \
+    libsdmutils \
+    memtrack.msm8937 \
     Snap \
     hostapd \
     libcld80211 \
@@ -76,6 +123,10 @@ PRODUCT_COPY_FILES += \
     $(DEVICE_PATH)/rootdir/init.target.rc:root/init.target.rc \
     $(DEVICE_PATH)/rootdir/init.trace.rc:root/init.trace.rc \
     $(DEVICE_PATH)/rootdir/ueventd.qcom.rc:root/ueventd.qcom.rc \
+    vendor/samsung/elitelte_kor/proprietary/etc/firmware/a300_pfp.fw:root/firmware/image/a300_pfp.fw \
+    vendor/samsung/elitelte_kor/proprietary/etc/firmware/a300_pm4.fw:root/firmware/image/a300_pm4.fw \
+    vendor/samsung/elitelte_kor/proprietary/etc/firmware/a300_pfp.fw:system/vendor/firmware/a300_pfp.fw \
+    vendor/samsung/elitelte_kor/proprietary/etc/firmware/a300_pm4.fw:system/vendor/firmware/a300_pm4.fw \
     $(DEVICE_PATH)/recovery.fstab:root/etc/recovery.fstab
 
 $(call inherit-product-if-exists, vendor/samsung/elitelte_kor/elitelte_kor-vendor.mk)

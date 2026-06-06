@@ -1,0 +1,132 @@
+LOCAL_PATH := $(call my-dir)
+DEVICE_LOCAL_PATH := $(LOCAL_PATH)
+
+# Build the Oreo-era Qualcomm display HALs from source for msm8937.
+# The stock Marshmallow hwcomposer blob initializes but crashes
+# SurfaceFlinger on LineageOS 15.1, so keep the display stack in the
+# normal platform build flow while this device tree owns the opt-in.
+
+include $(CLEAR_VARS)
+include hardware/qcom/display/msm8996/common.mk
+
+LOCAL_MODULE := libsdmutils
+LOCAL_PROPRIETARY_MODULE := true
+LOCAL_MODULE_TAGS := optional
+LOCAL_C_INCLUDES := \
+    hardware/qcom/display/msm8996/sdm/include
+LOCAL_CFLAGS := \
+    -Wno-missing-field-initializers \
+    -Wno-unused-parameter \
+    -std=c++11 \
+    -DLOG_TAG=\"SDM\" \
+    -DDEBUG_CALC_FPS \
+    -D__STDC_FORMAT_MACROS
+LOCAL_CLANG := true
+LOCAL_SRC_FILES := \
+    sdmutils/debug.cpp \
+    sdmutils/rect.cpp \
+    sdmutils/sys.cpp \
+    sdmutils/formats.cpp \
+    sdm_legacy_sys.cpp
+include $(BUILD_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+include hardware/qcom/display/msm8996/common.mk
+
+LOCAL_PATH := $(DEVICE_LOCAL_PATH)
+
+LOCAL_MODULE := libsdmcore
+LOCAL_PROPRIETARY_MODULE := true
+LOCAL_MODULE_TAGS := optional
+LOCAL_C_INCLUDES := \
+    $(common_includes) \
+    $(kernel_includes) \
+    $(DEVICE_LOCAL_PATH)/sdmcore
+LOCAL_CFLAGS := \
+    -Wno-missing-field-initializers \
+    -Wno-unused-parameter \
+    -Wno-non-virtual-dtor \
+    -std=c++11 \
+    -fcolor-diagnostics \
+    -DLOG_TAG=\"SDM\" \
+    $(common_flags) \
+    -include $(DEVICE_LOCAL_PATH)/sdm_mdp_compat.h
+LOCAL_CLANG := true
+LOCAL_SHARED_LIBRARIES := \
+    libdl \
+    libsdmutils \
+    libc++
+LOCAL_ADDITIONAL_DEPENDENCIES := $(common_deps) $(kernel_deps)
+LOCAL_SRC_FILES := \
+    sdmcore/core_interface.cpp \
+    sdmcore/core_impl.cpp \
+    sdmcore/display_base.cpp \
+    sdmcore/display_primary.cpp \
+    sdmcore/display_hdmi.cpp \
+    sdmcore/display_virtual.cpp \
+    sdmcore/comp_manager.cpp \
+    sdmcore/strategy.cpp \
+    sdmcore/resource_default.cpp \
+    sdmcore/dump_impl.cpp \
+    sdmcore/color_manager.cpp \
+    sdmcore/fb/hw_info.cpp \
+    sdmcore/fb/hw_device.cpp \
+    sdmcore/fb/hw_primary.cpp \
+    sdmcore/fb/hw_hdmi.cpp \
+    sdmcore/fb/hw_virtual.cpp \
+    sdmcore/fb/hw_color_manager.cpp \
+    sdmcore/fb/hw_scale.cpp \
+    sdmcore/fb/hw_events.cpp
+include $(BUILD_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+include hardware/qcom/display/msm8996/common.mk
+
+LOCAL_MODULE := hwcomposer.$(TARGET_BOARD_PLATFORM)
+LOCAL_MODULE_RELATIVE_PATH := hw
+LOCAL_PROPRIETARY_MODULE := true
+LOCAL_MODULE_TAGS := optional
+LOCAL_C_INCLUDES := \
+    $(common_includes) \
+    $(DEVICE_LOCAL_PATH)/hwc
+LOCAL_CFLAGS := \
+    -Wno-missing-field-initializers \
+    -Wno-unused-parameter \
+    -std=c++11 \
+    -fcolor-diagnostics \
+    -DLOG_TAG=\"SDM\" \
+    $(common_flags)
+LOCAL_CLANG := true
+LOCAL_SHARED_LIBRARIES := \
+    libsdmcore \
+    libqservice \
+    libbinder \
+    libhardware \
+    libhardware_legacy \
+    libutils \
+    liblog \
+    libcutils \
+    libsync \
+    libmemalloc \
+    libqdutils \
+    libdl \
+    libpowermanager \
+    libsdmutils \
+    libc++
+LOCAL_SRC_FILES := \
+    hwc/hwc_session.cpp \
+    hwc/hwc_display.cpp \
+    hwc/hwc_display_null.cpp \
+    hwc/hwc_display_primary.cpp \
+    hwc/hwc_display_external.cpp \
+    hwc/hwc_display_virtual.cpp \
+    hwc/hwc_debugger.cpp \
+    hwc/hwc_buffer_allocator.cpp \
+    hwc/hwc_buffer_sync_handler.cpp \
+    hwc/hwc_color_manager.cpp \
+    hwc/blit_engine_c2d.cpp \
+    hwc/cpuhint.cpp
+include $(BUILD_SHARED_LIBRARY)
+
+LOCAL_PATH := $(DEVICE_LOCAL_PATH)
+include $(DEVICE_LOCAL_PATH)/gatekeeper/Android.mk
