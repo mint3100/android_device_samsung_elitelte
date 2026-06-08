@@ -1,0 +1,12 @@
+type per_mgr, domain;
+type per_mgr_exec, exec_type, file_type;
+init_daemon_domain(per_mgr)
+binder_use(per_mgr)
+binder_service(per_mgr)
+
+allow per_mgr binder_per_mgr_service:service_manager { add find };
+allow per_mgr self:capability net_bind_service;
+allow per_mgr self:socket create_socket_perms_no_ioctl;
+allowxperm per_mgr self:socket ioctl { 0xc300-0xc3ff };
+r_dir_file(per_mgr, system_file)
+r_dir_file(per_mgr, sysfs)

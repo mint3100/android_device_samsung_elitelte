@@ -1,0 +1,17 @@
+type wcnss_service, domain;
+type wcnss_service_exec, exec_type, file_type;
+init_daemon_domain(wcnss_service)
+net_domain(wcnss_service)
+
+allow wcnss_service self:capability { net_admin net_bind_service };
+allow wcnss_service self:socket create_socket_perms_no_ioctl;
+allowxperm wcnss_service self:socket ioctl { 0xc300-0xc3ff };
+allow wcnss_service wcnss_device:chr_file rw_file_perms;
+allow wcnss_service smem_log_device:chr_file rw_file_perms;
+allow wcnss_service qmuxd_socket:dir create_dir_perms;
+unix_socket_connect(wcnss_service, qmuxd, qmuxd)
+allow wcnss_service qmuxd_socket:sock_file { create getattr read setattr unlink write };
+allow wcnss_service wifi_data_file:dir create_dir_perms;
+allow wcnss_service wifi_data_file:file create_file_perms;
+r_dir_file(wcnss_service, system_file)
+allow wcnss_service sysfs:file rw_file_perms;

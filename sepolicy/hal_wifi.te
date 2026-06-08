@@ -1,0 +1,6 @@
+allow hal_wifi efs_file:dir search;
+r_dir_file(hal_wifi, wifi_efs_file)
+allow hal_wifi self:capability sys_module;
+allow hal_wifi vendor_file:system module_load;
+not_full_treble(`allow hal_wifi system_file:system module_load;')
+allow hal_wifi proc_modules:file r_file_perms;

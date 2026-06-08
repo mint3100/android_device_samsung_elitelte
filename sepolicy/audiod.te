@@ -1,0 +1,6 @@
+type audiod, domain;
+type audiod_exec, exec_type, file_type;
+init_daemon_domain(audiod)
+allow audiod self:capability { dac_override setgid setuid };
+allow audiod self:socket create_socket_perms_no_ioctl;
+r_dir_file(audiod, system_file)

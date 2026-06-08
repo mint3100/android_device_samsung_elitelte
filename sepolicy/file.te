@@ -1,0 +1,3 @@
+type qmuxd_socket, file_type;
+type netmgrd_socket, file_type;
+type wifi_efs_file, file_type;

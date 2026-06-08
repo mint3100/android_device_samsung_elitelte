@@ -1,0 +1,9 @@
+r_dir_file(bluetooth, system_file)
+r_dir_file(bluetooth, bluetooth_efs_file)
+
+type btnvtool, domain;
+type btnvtool_exec, exec_type, file_type;
+init_daemon_domain(btnvtool)
+allow btnvtool efs_file:dir search;
+allow btnvtool bluetooth_efs_file:dir create_dir_perms;
+allow btnvtool bluetooth_efs_file:file create_file_perms;

@@ -1,0 +1,17 @@
+type netmgrd, domain;
+type netmgrd_exec, exec_type, file_type;
+init_daemon_domain(netmgrd)
+net_domain(netmgrd)
+
+allow netmgrd self:capability { fsetid net_admin net_bind_service net_raw setgid setpcap setuid sys_module };
+allow netmgrd self:netlink_route_socket { bind create getattr nlmsg_read nlmsg_write read setopt write };
+allow netmgrd self:rawip_socket { create getopt setopt write };
+allow netmgrd self:socket create_socket_perms_no_ioctl;
+allowxperm netmgrd self:socket ioctl { 0xc300-0xc3ff };
+allow netmgrd qmuxd_socket:dir create_dir_perms;
+unix_socket_connect(netmgrd, qmuxd, qmuxd)
+allow netmgrd qmuxd_socket:sock_file { create getattr read setattr unlink write };
+allow netmgrd netmgrd_socket:dir create_dir_perms;
+allow netmgrd netmgrd_socket:sock_file create_file_perms;
+allow netmgrd sysfs:file rw_file_perms;
+allow netmgrd system_file:file rx_file_perms;
