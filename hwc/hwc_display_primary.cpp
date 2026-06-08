@@ -139,8 +139,6 @@ void HWCDisplayPrimary::ProcessBootAnimCompleted(hwc_display_contents_1_t *list)
 int HWCDisplayPrimary::Prepare(hwc_display_contents_1_t *content_list) {
   int status = 0;
   DisplayError error = kErrorNone;
-  DLOGI("elitelte: Primary Prepare begin content=%p layers=%zu", content_list,
-        content_list ? content_list->numHwLayers : 0);
 
   if (!boot_animation_completed_) {
     ProcessBootAnimCompleted(content_list);
@@ -148,25 +146,20 @@ int HWCDisplayPrimary::Prepare(hwc_display_contents_1_t *content_list) {
 
   if (display_paused_) {
     MarkLayersForGPUBypass(content_list);
-    DLOGI("elitelte: Primary Prepare display_paused");
     return status;
   }
 
-  DLOGI("elitelte: AllocateLayerStack begin");
   status = AllocateLayerStack(content_list);
   if (status) {
     DLOGE("elitelte: AllocateLayerStack failed status=%d", status);
     return status;
   }
-  DLOGI("elitelte: AllocateLayerStack done");
 
-  DLOGI("elitelte: PrePrepareLayerStack begin");
   status = PrePrepareLayerStack(content_list);
   if (status) {
     DLOGE("elitelte: PrePrepareLayerStack failed status=%d", status);
     return status;
   }
-  DLOGI("elitelte: PrePrepareLayerStack done");
 
   bool pending_output_dump = dump_frame_count_ && dump_output_to_file_;
 
@@ -178,11 +171,9 @@ int HWCDisplayPrimary::Prepare(hwc_display_contents_1_t *content_list) {
   }
 
   bool one_updating_layer = SingleLayerUpdating(UINT32(content_list->numHwLayers - 1));
-  DLOGI("elitelte: SingleLayerUpdating=%d", one_updating_layer);
   ToggleCPUHint(one_updating_layer);
 
   uint32_t refresh_rate = GetOptimalRefreshRate(one_updating_layer);
-  DLOGI("elitelte: refresh current=%u optimal=%u", current_refresh_rate_, refresh_rate);
   if (current_refresh_rate_ != refresh_rate) {
     error = display_intf_->SetRefreshRate(refresh_rate);
   }
@@ -196,13 +187,11 @@ int HWCDisplayPrimary::Prepare(hwc_display_contents_1_t *content_list) {
     handle_idle_timeout_ = false;
   }
 
-  DLOGI("elitelte: PrepareLayerStack begin");
   status = PrepareLayerStack(content_list);
   if (status) {
     DLOGE("elitelte: PrepareLayerStack failed status=%d", status);
     return status;
   }
-  DLOGI("elitelte: Primary Prepare done");
 
   return 0;
 }

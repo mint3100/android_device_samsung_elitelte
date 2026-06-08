@@ -1,84 +1,52 @@
-# android_device_samsung_elitelte_kor
+# android_device_samsung_elitelte
 
-LineageOS 15.1 device tree for the Korean Samsung Galaxy Folder2 (`elitelte_kor`, SM-G160N).
+LineageOS 15.1 device tree for Samsung Galaxy Folder2 elitelte variants.
 
-This tree is part of an Android 8.1 bring-up for a 32-bit ARM LineageOS build. It describes the board, product, boot image layout, ramdisk files, recovery fstab, and device-side init configuration used by the ROM build.
+This tree is shared by the Korean SM-G160N target and the Chinese/HK SM-G1650
+target.  Region-specific kernel selection is handled from `BoardConfig.mk`
+based on the selected lunch product.
 
 ## Device Summary
 
 | Item | Value |
 | --- | --- |
 | Device | Samsung Galaxy Folder2 |
-| Model | SM-G160N |
-| Codename | `elitelte_kor` |
+| Models | SM-G160N, SM-G1650 |
+| Codename | `elitelte` |
 | Platform | Qualcomm MSM8937 / MSM8917 family |
 | Android target | LineageOS 15.1 / Android 8.1 |
 | Architecture | 32-bit ARM (`armeabi-v7a`) |
-| Kernel image | Source-built `zImage-dtb` |
-| Vendor path | `vendor/samsung/elitelte_kor` |
-| Kernel path | `kernel/samsung/msm8917_elitelte_kor` |
+| Vendor path | `vendor/samsung/elitelte` |
+| Kernel path | `kernel/samsung/msm8917_elitelte` |
 
-## What This Tree Provides
+## Products
 
-- Lineage product target: `lineage_elitelte_kor`.
-- Board configuration for a 32-bit ARM userspace and kernel.
-- Source-built kernel integration through `TARGET_KERNEL_SOURCE`.
-- Standard LineageOS boot image generation with a source-built `zImage-dtb`.
-- Qualcomm/Samsung hardware feature flags for Bluetooth, camera, and Wi-Fi.
-- Android feature permission XMLs and core Wi-Fi/camera package declarations.
-- Legacy boot ramdisk configuration for Android 8.1.
-- Device init scripts, fstab files, USB configuration, recovery fstab, and root mount points.
-- Vendor inheritance for proprietary files under `vendor/samsung/elitelte_kor`.
+```sh
+lunch lineage_elitelte-userdebug
+lunch lineage_elitelte_chn-userdebug
+```
 
-## Expected Source Layout
+`lineage_elitelte` is the current KOR-oriented default target and uses
+`msm8937_sec_elitelte_kor_defconfig`.  `lineage_elitelte_chn` uses the stock
+CHN/HK `msm8937_sec_elitelte_chn_defconfig`.
 
-Place the three device-specific repositories under a LineageOS 15.1 source tree like this:
+## Source Layout
 
 ```text
-device/samsung/elitelte_kor
-vendor/samsung/elitelte_kor
-kernel/samsung/msm8917_elitelte_kor
-```
-
-## Build
-
-From the root of the LineageOS 15.1 source tree:
-
-```sh
-source build/envsetup.sh
-lunch lineage_elitelte_kor-userdebug
-make clean
-mka bacon
-```
-
-For boot image testing only:
-
-```sh
-source build/envsetup.sh
-lunch lineage_elitelte_kor-userdebug
-mka bootimage
-```
-
-For recovery image testing only:
-
-```sh
-source build/envsetup.sh
-lunch lineage_elitelte_kor-userdebug
-mka recoveryimage
+device/samsung/elitelte
+vendor/samsung/elitelte
+kernel/samsung/msm8917_elitelte
 ```
 
 ## Bring-up Notes
 
-- This tree is for the Korean `elitelte_kor` target, not the Chinese `elitelte` variants.
-- The intended ROM target is 32-bit LineageOS 15.1.
-- The kernel is built from source; this tree is not designed around a prebuilt kernel.
-- The boot image uses the standard LineageOS build flow; no prebuilt kernel or custom boot image makefile is used.
-- The device is still under bring-up. Treat boot, radio, camera, audio, and power behavior as active validation areas.
-
-## Related Repositories
-
-- `android_vendor_samsung_elitelte_kor`
-- `android_kernel_samsung_msm8917_elitelte_kor`
+- The kernel is built from source; do not replace it with a prebuilt kernel.
+- The boot image uses a separate `dt.img` and legacy ramdisk layout.
+- The vendor tree currently contains a shared bring-up blob set.  Add CHN-only
+  proprietary files only after a CHN stock dump or device log proves they are
+  needed.
+- Boot, radio, camera, audio, display, Wi-Fi, and power behavior remain active
+  validation areas.
 
 ## Branch
 

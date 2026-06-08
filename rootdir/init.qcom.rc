@@ -29,7 +29,6 @@ import init.qcom.usb.rc
 import init.msm.usb.configfs.rc
 import init.trace.rc
 import init.container.rc
-import init.rilcommon.rc
 import init.target.rc
 import init.qcom.factory.rc
 
@@ -62,7 +61,7 @@ on early-boot
     # Allow subsystem (modem etc) debugging
     write /sys/kernel/boot_adsp/boot 1
     write /sys/kernel/boot_slpi/boot 1
-    exec u:r:qti_init_shell:s0 -- /init.qcom.early_boot.sh
+    exec -- /init.qcom.early_boot.sh
 
 on boot
     chown bluetooth bluetooth /sys/module/bluetooth_power/parameters/power
@@ -601,7 +600,7 @@ service bridgemgrd /system/bin/bridgemgrd
 
 service port-bridge /system/bin/port-bridge
     class main
-    user radio system
+    user radio
     group radio system inet
     disabled
     oneshot
@@ -618,6 +617,11 @@ service qmuxd /system/bin/qmuxd
     user root
     group radio audio bluetooth gps nfc
     disabled
+
+service pm-service /system/bin/pm-service
+    class main
+    user system
+    group system radio
 
 service netmgrd /system/bin/netmgrd
     class main
@@ -902,12 +906,6 @@ service atfwd /system/bin/ATFWD-daemon
     group system radio
     disabled
 
-service hostapd /system/bin/hostapd -dd /data/hostapd/hostapd.conf
-    class late_start
-    user root
-    group root
-    oneshot
-    disabled
 
 service ds_fmc_appd /system/bin/ds_fmc_appd -p "rmnet0" -D
     class late_start
@@ -917,14 +915,6 @@ service ds_fmc_appd /system/bin/ds_fmc_appd -p "rmnet0" -D
 
 on property:persist.data.ds_fmc_app.mode=1
     start ds_fmc_appd
-
-service ims_regmanager /system/bin/exe-ims-regmanagerprocessnative
-    class late_start
-    group net_bt_admin inet radio wifi
-    disabled
-
-on property:persist.ims.regmanager.mode=1
-    start ims_regmanager
 
 on property:ro.data.large_tcp_window_size=true
     # Adjust socket buffer to enlarge TCP receive window for high bandwidth (e.g. DO-RevB)

@@ -1,8 +1,10 @@
-DEVICE_PATH := device/samsung/elitelte_kor
+DEVICE_PATH := device/samsung/elitelte
 
 PRODUCT_AAPT_CONFIG := normal
 PRODUCT_AAPT_PREF_CONFIG := mdpi
 PRODUCT_CHARACTERISTICS := phone
+
+PRODUCT_PACKAGE_OVERLAYS += $(DEVICE_PATH)/overlay
 
 PRODUCT_PROPERTY_OVERRIDES += \
     ro.hardware=qcom \
@@ -15,9 +17,10 @@ PRODUCT_PROPERTY_OVERRIDES += \
     ro.sf.lcd_density=240 \
     persist.sys.usb.config=mtp,adb \
     rild.libpath=/vendor/lib/libsec-ril.so \
-    debug.sf.hw=0 \
-    debug.egl.hw=0 \
-    debug.gralloc.enable_fb_ubwc=1 \
+    debug.egl.hw=1 \
+    debug.sf.hw=1 \
+    debug.gralloc.enable_fb_ubwc=0 \
+    debug.gralloc.gfx_ubwc_disable=1 \
     debug.sf.latch_unsignaled=1 \
     persist.cne.feature=1 \
     persist.fuse_sdcard=true \
@@ -58,6 +61,7 @@ PRODUCT_PACKAGES += \
     android.hardware.bluetooth@1.0-service \
     libbt-vendor \
     android.hardware.wifi@1.0-service \
+    libxml2 \
     copybit.msm8937 \
     gralloc.msm8937 \
     hwcomposer.msm8937 \
@@ -68,6 +72,7 @@ PRODUCT_PACKAGES += \
     android.hardware.keymaster@3.0-service \
     android.hardware.memtrack@1.0-impl \
     android.hardware.memtrack@1.0-service \
+    android.hardware.media.omx@1.0-service \
     libmemalloc \
     libqdMetaData \
     libqdutils \
@@ -101,6 +106,12 @@ PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.software.midi.xml:system/etc/permissions/android.software.midi.xml \
     frameworks/native/data/etc/android.software.sip.voip.xml:system/etc/permissions/android.software.sip.voip.xml \
     frameworks/native/data/etc/handheld_core_hardware.xml:system/etc/permissions/handheld_core_hardware.xml \
+    $(DEVICE_PATH)/keylayout/ft5x06_ts.kl:system/usr/keylayout/ft5x06_ts.kl \
+    $(DEVICE_PATH)/keylayout/gpio-keys.kl:system/usr/keylayout/gpio-keys.kl \
+    $(DEVICE_PATH)/keylayout/qpnp_pon.kl:system/usr/keylayout/qpnp_pon.kl \
+    $(DEVICE_PATH)/keylayout/sec_keypad_3x4-keypad.kl:system/usr/keylayout/sec_keypad_3x4-keypad.kl \
+    $(DEVICE_PATH)/keylayout/synaptics_dsx.kl:system/usr/keylayout/synaptics_dsx.kl \
+    $(DEVICE_PATH)/keylayout/synaptics_rmi4_i2c.kl:system/usr/keylayout/synaptics_rmi4_i2c.kl \
     $(DEVICE_PATH)/rootdir/adb_keys:root/adb_keys \
     $(DEVICE_PATH)/rootdir/fstab.qcom:root/fstab.qcom \
     $(DEVICE_PATH)/rootdir/init.carrier.rc:root/init.carrier.rc \
@@ -118,15 +129,24 @@ PRODUCT_COPY_FILES += \
     $(DEVICE_PATH)/rootdir/init.qcom.usb.rc:root/init.qcom.usb.rc \
     $(DEVICE_PATH)/rootdir/init.qcom.usb.sh:root/init.qcom.usb.sh \
     $(DEVICE_PATH)/rootdir/init.recovery.qcom.rc:root/init.recovery.qcom.rc \
-    $(DEVICE_PATH)/rootdir/init.rilchip.rc:root/init.rilchip.rc \
-    $(DEVICE_PATH)/rootdir/init.rilcommon.rc:root/init.rilcommon.rc \
     $(DEVICE_PATH)/rootdir/init.target.rc:root/init.target.rc \
     $(DEVICE_PATH)/rootdir/init.trace.rc:root/init.trace.rc \
     $(DEVICE_PATH)/rootdir/ueventd.qcom.rc:root/ueventd.qcom.rc \
-    vendor/samsung/elitelte_kor/proprietary/etc/firmware/a300_pfp.fw:root/firmware/image/a300_pfp.fw \
-    vendor/samsung/elitelte_kor/proprietary/etc/firmware/a300_pm4.fw:root/firmware/image/a300_pm4.fw \
-    vendor/samsung/elitelte_kor/proprietary/etc/firmware/a300_pfp.fw:system/vendor/firmware/a300_pfp.fw \
-    vendor/samsung/elitelte_kor/proprietary/etc/firmware/a300_pm4.fw:system/vendor/firmware/a300_pm4.fw \
+    vendor/samsung/elitelte/proprietary/etc/firmware/a300_pfp.fw:root/firmware/image/a300_pfp.fw \
+    vendor/samsung/elitelte/proprietary/etc/firmware/a300_pm4.fw:root/firmware/image/a300_pm4.fw \
+    vendor/samsung/elitelte/proprietary/etc/firmware/a300_pfp.fw:system/vendor/firmware/a300_pfp.fw \
+    vendor/samsung/elitelte/proprietary/etc/firmware/a300_pm4.fw:system/vendor/firmware/a300_pm4.fw \
     $(DEVICE_PATH)/recovery.fstab:root/etc/recovery.fstab
 
-$(call inherit-product-if-exists, vendor/samsung/elitelte_kor/elitelte_kor-vendor.mk)
+$(call inherit-product-if-exists, vendor/samsung/elitelte/elitelte-vendor.mk)
+
+# Qualcomm CAF media stack for MSM8937 hardware codecs.
+PRODUCT_PACKAGES += \
+    libOmxCore \
+    libmm-omxcore \
+    libOmxVidcCommon \
+    libOmxVenc \
+    libOmxVdec \
+    libOmxSwVdec \
+    libstagefrighthw \
+    libc2dcolorconvert

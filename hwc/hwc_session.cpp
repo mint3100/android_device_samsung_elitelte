@@ -266,7 +266,6 @@ int HWCSession::Close(hw_device_t *device) {
 int HWCSession::Prepare(hwc_composer_device_1 *device, size_t num_displays,
                         hwc_display_contents_1_t **displays) {
   DTRACE_SCOPED();
-  DLOGI("elitelte: Prepare begin num_displays=%zu displays=%p", num_displays, displays);
 
   if (!device || !displays || num_displays > HWC_NUM_DISPLAY_TYPES) {
     DLOGE("elitelte: Prepare invalid args device=%p displays=%p num_displays=%zu",
@@ -337,8 +336,6 @@ int HWCSession::Prepare(hwc_composer_device_1 *device, size_t num_displays,
       }
 
     if (hwc_session->hwc_display_[dpy]) {
-      DLOGI("elitelte: Prepare display=%zd content=%p layers=%zu", dpy, content_list,
-            content_list ? content_list->numHwLayers : 0);
       if (!content_list) {
         DLOGI("Display[%d] connected. content_list is null", dpy);
       } else if (!content_list->numHwLayers) {
@@ -355,7 +352,6 @@ int HWCSession::Prepare(hwc_composer_device_1 *device, size_t num_displays,
     hwc_procs->hotplug(hwc_procs, HWC_DISPLAY_EXTERNAL, true);
   }
   // Return 0, else client will go into bad state
-  DLOGI("elitelte: Prepare done");
   return 0;
 }
 
@@ -375,7 +371,6 @@ int HWCSession::GetVsyncPeriod(int disp) {
 int HWCSession::Set(hwc_composer_device_1 *device, size_t num_displays,
                     hwc_display_contents_1_t **displays) {
   DTRACE_SCOPED();
-  DLOGI("elitelte: Set begin num_displays=%zu displays=%p", num_displays, displays);
 
   SEQUENCE_EXIT_SCOPE_LOCK(locker_);
 
@@ -398,8 +393,6 @@ int HWCSession::Set(hwc_composer_device_1 *device, size_t num_displays,
 
   for (size_t dpy = 0; dpy < num_displays; dpy++) {
     hwc_display_contents_1_t *content_list = displays[dpy];
-    DLOGI("elitelte: Set display=%zu content=%p layers=%zu", dpy, content_list,
-          content_list ? content_list->numHwLayers : 0);
 
     // Drop virtual display composition if virtual display object could not be created
     // due to HDMI concurrency.
@@ -413,9 +406,7 @@ int HWCSession::Set(hwc_composer_device_1 *device, size_t num_displays,
     }
 
     if (hwc_session->hwc_display_[dpy]) {
-      DLOGI("elitelte: Commit begin display=%zu", dpy);
       hwc_session->hwc_display_[dpy]->Commit(content_list);
-      DLOGI("elitelte: Commit done display=%zu", dpy);
     }
     CloseAcquireFds(content_list);
   }
@@ -434,7 +425,6 @@ int HWCSession::Set(hwc_composer_device_1 *device, size_t num_displays,
   CALC_FPS();
 
   // Return 0, else client will go into bad state
-  DLOGI("elitelte: Set done");
   return 0;
 }
 

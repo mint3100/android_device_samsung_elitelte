@@ -1,2 +1,4 @@
-add_lunch_combo lineage_elitelte_kor-userdebug
-add_lunch_combo lineage_elitelte_kor-eng
+add_lunch_combo lineage_elitelte-userdebug
+add_lunch_combo lineage_elitelte-eng
+add_lunch_combo lineage_elitelte_chn-userdebug
+add_lunch_combo lineage_elitelte_chn-eng

@@ -130,3 +130,20 @@ include $(BUILD_SHARED_LIBRARY)
 
 LOCAL_PATH := $(DEVICE_LOCAL_PATH)
 include $(DEVICE_LOCAL_PATH)/gatekeeper/Android.mk
+
+# Build the Oreo CAF Qualcomm media stack for msm8937. The top-level
+# hardware/qcom/media Android.mk does not select msm8998 sources for msm8937
+# in this tree, so include the matching CAF variant from the device tree.
+QCOM_MEDIA_ROOT := hardware/qcom/media/msm8953
+include $(QCOM_MEDIA_ROOT)/mm-core/Android.mk
+include $(QCOM_MEDIA_ROOT)/libstagefrighthw/Android.mk
+include $(DEVICE_LOCAL_PATH)/qcom-media/common/Android.mk
+include $(DEVICE_LOCAL_PATH)/qcom-media/vdec/Android.mk
+
+# Use the device-side venc include so the absent software MPEG4 encoder
+# dependency is not emitted, while keeping the hardware AVC VIDC encoder.
+include $(DEVICE_LOCAL_PATH)/qcom-media/venc/Android.mk
+
+ifeq ($(BOARD_USES_ADRENO), true)
+include $(DEVICE_LOCAL_PATH)/qcom-media/libc2dcolorconvert/Android.mk
+endif

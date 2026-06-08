@@ -1,10 +1,15 @@
-DEVICE_PATH := device/samsung/elitelte_kor
+DEVICE_PATH := device/samsung/elitelte
 LOCAL_PATH := $(DEVICE_PATH)
+
+ELITELTE_VARIANT := kor
+ifneq ($(filter lineage_elitelte_chn,$(TARGET_PRODUCT)),)
+ELITELTE_VARIANT := chn
+endif
 
 TARGET_NO_BOOTLOADER := true
 TARGET_BOARD_PLATFORM := msm8937
 TARGET_BOOTLOADER_BOARD_NAME := msm8937
-TARGET_OTA_ASSERT_DEVICE := elitelte_kor,eliteltekor,eliteltekx,SM-G160N
+TARGET_OTA_ASSERT_DEVICE := elitelte,elitelte_kor,eliteltekor,eliteltekx,SM-G160N,SM-G1650
 
 TARGET_ARCH := arm
 TARGET_ARCH_VARIANT := armv7-a-neon
@@ -13,15 +18,17 @@ TARGET_CPU_ABI2 := armeabi
 TARGET_CPU_VARIANT := cortex-a53
 
 TARGET_KERNEL_ARCH := arm
-TARGET_KERNEL_SOURCE := kernel/samsung/msm8917_elitelte_kor
+TARGET_KERNEL_SOURCE := kernel/samsung/msm8917_elitelte
 TARGET_KERNEL_CONFIG := msm8937_sec_defconfig
-TARGET_KERNEL_VARIANT_CONFIG := msm8937_sec_elitelte_kor_defconfig
+TARGET_KERNEL_VARIANT_CONFIG := msm8937_sec_elitelte_$(ELITELTE_VARIANT)_defconfig
 TARGET_KERNEL_SELINUX_CONFIG := selinux_defconfig
 TARGET_KERNEL_CROSS_COMPILE_PREFIX := arm-eabi-
+TARGET_COMPILE_WITH_MSM_KERNEL := true
 KERNEL_TOOLCHAIN := $(ANDROID_BUILD_TOP)/prebuilts/gcc/linux-x86/arm/arm-eabi-4.8/bin
 TARGET_COPY_OUT_VENDOR := system/vendor
 DEVICE_MANIFEST_FILE := $(DEVICE_PATH)/manifest.xml
-# elitelte_kor boots from a legacy ramdisk, not system-as-root.  Keep a real
+BOARD_SEPOLICY_DIRS += $(DEVICE_PATH)/sepolicy
+# elitelte boots from a legacy ramdisk, not system-as-root.  Keep a real
 # /default.prop in the boot ramdisk so second-stage init has default props
 # before /system is mounted.
 BOARD_PROPERTY_OVERRIDES_SPLIT_ENABLED := false
@@ -33,6 +40,7 @@ TARGET_USES_C2D_COMPOSITION := true
 TARGET_USES_GRALLOC1 := false
 TARGET_USES_HWC2 := false
 MSM_VIDC_TARGET_LIST := msm8937
+BOARD_USES_ADRENO := true
 
 # Bluetooth
 BOARD_HAVE_BLUETOOTH_QCOM := true
@@ -57,7 +65,7 @@ BOARD_HAVE_SAMSUNG_WIFI := true
 WPA_SUPPLICANT_VERSION := VER_0_8_X
 WIFI_DRIVER_MODULE_PATH := "/system/vendor/lib/modules/wlan.ko"
 WIFI_DRIVER_MODULE_NAME := "wlan"
-WIFI_DRIVER_MODULE_ARG := "con_mode=5"
+WIFI_DRIVER_MODULE_ARG := "con_mode=0"
 
 BOARD_KERNEL_IMAGE_NAME := zImage
 BOARD_KERNEL_SEPARATED_DT := true

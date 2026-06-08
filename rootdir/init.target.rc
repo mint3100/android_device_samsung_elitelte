@@ -75,7 +75,7 @@ on fs
     mount vfat /dev/block/bootdevice/by-name/modem /firmware-modem ro context=u:object_r:system_file:s0,shortname=lower,uid=1000,gid=1000,dmask=227,fmask=337
     #write /sys/kernel/boot_adsp/boot 1
 
-    rm -rf /efs/dmverity
+    exec -- /system/bin/rm -rf /efs/dmverity
 
 on post-fs-data
     mkdir /data/tombstones 0771 system system
@@ -187,11 +187,18 @@ service audiod /system/bin/audiod
    group system
    disabled
 
+service load_wlan /system/bin/insmod /system/vendor/lib/modules/wlan.ko con_mode=0
+    class late_start
+    user root
+    group root
+    oneshot
+    disabled
+
 on boot
     start rmt_storage
     write /sys/module/firmware_class/parameters/path /firmware/image
-    insmod /system/vendor/lib/modules/wlan.ko con_mode=5
     start wcnss-service
+    start load_wlan
 # access permission for secure touch
     chmod 0660 /sys/devices/soc.0/78b7000.i2c/i2c-3/3-0020/input/input0/secure_touch_enable
     chmod 0440 /sys/devices/soc.0/78b7000.i2c/i2c-3/3-0020/input/input0/secure_touch
@@ -249,54 +256,9 @@ service wcnss-service /system/bin/wcnss_service
 on charger
     wait /dev/block/bootdevice/by-name/system
     mount ext4 /dev/block/bootdevice/by-name/system /system ro barrier=1
-    load_all_props
+    load_system_props
     start qcom-post-boot
     start hvdcp_opti
-
-service imsstarter /system/bin/sh /system/etc/init.qti.ims.sh
-    class main
-    oneshot
-    disabled
-
-on property:vold.decrypt=trigger_restart_framework
-    # IMS startup scripts are not packaged in the current Lineage bring-up build.
-
-service imsqmidaemon /system/bin/imsqmidaemon
-    class main
-    user system
-    socket ims_qmid stream 0660 system radio
-    group radio net_raw log diag
-    disabled
-
-on property:service.qti.ims.enabled=1
-    start imsqmidaemon
-
-service imsdatadaemon /system/bin/imsdatadaemon
-    class main
-    user system
-    socket ims_datad stream 0660 system radio
-    group system wifi radio inet net_raw log diag net_admin
-    disabled
-
-on property:sys.ims.QMI_DAEMON_STATUS=1
-    start imsdatadaemon
-
-service ims_rtp_daemon /system/bin/ims_rtp_daemon
-   class main
-   user system
-   socket ims_rtpd stream 0660 system radio
-   group radio net_raw diag diag inet log
-   disabled
-
-service imscmservice /system/bin/imscmservice
-   class main
-   user system
-   group radio net_raw diag diag log
-   disabled
-
-on property:sys.ims.DATA_DAEMON_STATUS=1
-    start ims_rtp_daemon
-    start imscmservice
 
 service hbtp /system/vendor/bin/hbtp_daemon
     class main

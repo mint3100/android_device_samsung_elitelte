@@ -1,0 +1,11 @@
+# Device-specific character devices that otherwise fall back to device:s0.
+/dev/kgsl               u:object_r:gpu_device:s0
+/dev/kgsl-3d0           u:object_r:gpu_device:s0
+/dev/kgsl-2d[0-9]       u:object_r:gpu_device:s0
+/dev/smdcntl[0-9]+      u:object_r:radio_device:s0
+/dev/rmnet.*            u:object_r:radio_device:s0
+/dev/qmi.*              u:object_r:radio_device:s0
+/dev/diag               u:object_r:radio_device:s0
+/dev/smd[0-9]+          u:object_r:radio_device:s0
+/dev/wcnss_wlan         u:object_r:radio_device:s0
+/dev/wcnss_ctrl         u:object_r:radio_device:s0
