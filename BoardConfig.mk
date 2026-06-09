@@ -28,6 +28,7 @@ KERNEL_TOOLCHAIN := $(ANDROID_BUILD_TOP)/prebuilts/gcc/linux-x86/arm/arm-eabi-4.
 TARGET_COPY_OUT_VENDOR := system/vendor
 DEVICE_MANIFEST_FILE := $(DEVICE_PATH)/manifest.xml
 BOARD_SEPOLICY_DIRS += $(DEVICE_PATH)/sepolicy
+TARGET_FS_CONFIG_GEN += $(DEVICE_PATH)/config.fs
 # elitelte boots from a legacy ramdisk, not system-as-root.  Keep a real
 # /default.prop in the boot ramdisk so second-stage init has default props
 # before /system is mounted.
