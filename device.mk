@@ -53,6 +53,8 @@ PRODUCT_PACKAGES += \
     audio.a2dp.default \
     audio.r_submix.default \
     audio.usb.default \
+    android.hardware.sensors@1.0-impl \
+    android.hardware.sensors@1.0-service \
     android.hardware.health@1.0-impl \
     android.hardware.health@1.0-service \
     android.hardware.gatekeeper@1.0-impl \

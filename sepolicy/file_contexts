@@ -6,6 +6,7 @@
 /dev/smdcntl[0-9]+      u:object_r:smd_device:s0
 /dev/smd[0-9]+          u:object_r:smd_device:s0
 /dev/smem_log           u:object_r:smem_log_device:s0
+/dev/subsys_.*          u:object_r:subsys_device:s0
 /dev/wcnss_wlan         u:object_r:wcnss_device:s0
 /dev/wcnss_ctrl         u:object_r:wcnss_device:s0
 /dev/rmnet.*            u:object_r:radio_device:s0
@@ -18,6 +19,7 @@
 /dev/socket/qmux_radio(/.*)?       u:object_r:qmuxd_socket:s0
 /dev/socket/qmux_nfc(/.*)?         u:object_r:qmuxd_socket:s0
 /dev/socket/netmgr(/.*)?           u:object_r:netmgrd_socket:s0
+/dev/socket/rild-cas               u:object_r:rild_socket:s0
 
 # Stock Samsung scripts execute these Qualcomm daemons from /system/bin.
 /system/bin/audiod          u:object_r:audiod_exec:s0

@@ -62,7 +62,7 @@ on early-boot
     # Allow subsystem (modem etc) debugging
     write /sys/kernel/boot_adsp/boot 1
     write /sys/kernel/boot_slpi/boot 1
-    exec -- /init.qcom.early_boot.sh
+    exec u:r:qcom_init_shell:s0 root root -- /system/bin/sh /init.qcom.early_boot.sh
 
 on boot
     chown bluetooth bluetooth /sys/module/bluetooth_power/parameters/power
@@ -466,11 +466,13 @@ on property:bluetooth.startbtsnoop=false
 service qcom-c_core-sh /system/bin/sh /init.qcom.class_core.sh
     class core
     user root
+    seclabel u:r:qcom_init_shell:s0
     oneshot
 
 service qcom-c_main-sh /system/bin/sh /init.class_main.sh
     class main
     user root
+    seclabel u:r:qcom_init_shell:s0
     oneshot
 
 on property:vold.decrypt=trigger_restart_framework
@@ -542,6 +544,7 @@ service config_bt_addr /system/bin/btnvtool -O
 service config_bluetooth /system/bin/sh /system/etc/init.qcom.bt.sh "onboot"
     class core
     user root
+    seclabel u:r:qcom_init_shell:s0
     disabled
     oneshot
 
@@ -549,6 +552,7 @@ service hciattach /system/bin/sh /system/etc/init.qcom.bt.sh
     class late_start
     user bluetooth
     group bluetooth net_bt_admin net_bt
+    seclabel u:r:qcom_init_shell:s0
     disabled
     oneshot
 
@@ -562,6 +566,7 @@ service hciattach_ath3k /system/bin/sh /system/etc/init.ath3k.bt.sh
      class late_start
      user bluetooth
      group system bluetooth net_bt_admin misc
+     seclabel u:r:qcom_init_shell:s0
      disabled
      oneshot
 
@@ -669,6 +674,7 @@ service btwlancoex /system/bin/sh /system/etc/init.qcom.coex.sh
     class late_start
     user bluetooth
     group bluetooth net_bt_admin inet net_admin net_raw
+    seclabel u:r:qcom_init_shell:s0
     disabled
     oneshot
 
@@ -843,6 +849,7 @@ service fm_dl /system/bin/sh /system/etc/init.qcom.fm.sh
     class late_start
     user system
     group system
+    seclabel u:r:qcom_init_shell:s0
     disabled
     oneshot
 
@@ -865,6 +872,7 @@ on property:drmdiag.load=0
 service qcom-sh /system/bin/sh /init.qcom.sh
     class late_start
     user root
+    seclabel u:r:qcom_init_shell:s0
     oneshot
 
 #service sensor-sh /system/bin/sh /init.qcom.sensors.sh
@@ -875,6 +883,7 @@ service qcom-sh /system/bin/sh /init.qcom.sh
 service qcom-post-boot /system/bin/sh /system/etc/init.qcom.post_boot.sh
     class late_start
     user root
+    seclabel u:r:qcom_init_shell:s0
     disabled
     oneshot
 
@@ -883,23 +892,24 @@ service qti-testscripts /system/bin/sh /system/etc/init.qcom.testscripts.sh
     user root
     disabled
     oneshot
-    seclabel u:r:qti-testscripts:s0
+    seclabel u:r:qcom_init_shell:s0
 
 service wifi-sdio-on /system/bin/sh /system/etc/init.qcom.sdio.sh
     class late_start
     group wifi inet
+    seclabel u:r:qcom_init_shell:s0
     disabled
     oneshot
 
 service wifi-crda /system/bin/sh /system/etc/init.crda.sh
    class late_start
    user root
+   seclabel u:r:qcom_init_shell:s0
    disabled
    oneshot
 
 on property:sys.boot_completed=1
     start qcom-post-boot
-    start qti-testscripts
 
 service atfwd /system/bin/ATFWD-daemon
     class late_start
@@ -945,6 +955,7 @@ service ril-daemon3 /system/bin/rild -c 3
 service usb_uicc_enable /system/bin/sh /system/etc/init.qcom.uicc.sh
     class late_start
     user root
+    seclabel u:r:qcom_init_shell:s0
     disabled
     oneshot
 
@@ -970,6 +981,7 @@ service profiler_daemon /system/bin/profiler_daemon
 service hcidump /system/bin/sh /system/etc/hcidump.sh
     user bluetooth
     group bluetooth system net_bt_admin net_admin
+    seclabel u:r:qcom_init_shell:s0
     disabled
     oneshot
 
@@ -1093,12 +1105,14 @@ service LKCore-rel /system/vendor/bin/LKCore
 service cs-early-boot /system/bin/sh /persist/coresight/qdss.agent.sh early-boot /system/etc/init.qcom.debug.sh
     class core
     user root
+    seclabel u:r:qcom_init_shell:s0
     disabled
     oneshot
 
 # Coresight post boot servive
 service cs-post-boot /system/bin/sh /persist/coresight/qdss.agent.sh
     user root
+    seclabel u:r:qcom_init_shell:s0
     disabled
     oneshot
 

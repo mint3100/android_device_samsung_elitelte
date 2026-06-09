@@ -1,0 +1,37 @@
+type qcom_init_shell, domain;
+
+allow qcom_init_shell shell_exec:file { entrypoint rx_file_perms };
+
+r_dir_file(qcom_init_shell, rootfs)
+r_dir_file(qcom_init_shell, system_file)
+r_dir_file(qcom_init_shell, vendor_file)
+
+allow qcom_init_shell system_file:file execute_no_trans;
+allow qcom_init_shell vendor_file:file execute_no_trans;
+allow qcom_init_shell toolbox_exec:file rx_file_perms;
+
+allow qcom_init_shell self:capability {
+    chown
+    dac_override
+    dac_read_search
+    fowner
+    fsetid
+    net_admin
+    net_raw
+    setgid
+    setuid
+    sys_admin
+};
+
+allow qcom_init_shell proc:file rw_file_perms;
+allow qcom_init_shell proc_net:file rw_file_perms;
+allow qcom_init_shell sysfs:dir r_dir_perms;
+allow qcom_init_shell sysfs:file rw_file_perms;
+
+set_prop(qcom_init_shell, bluetooth_prop)
+set_prop(qcom_init_shell, ctl_default_prop)
+set_prop(qcom_init_shell, net_radio_prop)
+set_prop(qcom_init_shell, radio_prop)
+set_prop(qcom_init_shell, system_prop)
+set_prop(qcom_init_shell, system_radio_prop)
+set_prop(qcom_init_shell, wifi_prop)

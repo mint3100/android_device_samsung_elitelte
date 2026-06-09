@@ -50,6 +50,7 @@ service start_netmgrd /system/bin/sh /system/etc/control_netmgrd.sh start
     class main
     user root
     group radio
+    seclabel u:r:qcom_init_shell:s0
     disabled
     oneshot
 
@@ -57,6 +58,7 @@ service stop_netmgrd /system/bin/sh /system/etc/control_netmgrd.sh stop
     class main
     user root
     group radio
+    seclabel u:r:qcom_init_shell:s0
     disabled
     oneshot
 
