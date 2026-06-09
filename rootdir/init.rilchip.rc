@@ -5,8 +5,6 @@
 #
 
 on boot
-    start qmuxd
-    start netmgrd
 service ril-daemon /vendor/bin/hw/rild
     class main
     socket rild stream 660 root radio
