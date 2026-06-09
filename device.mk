@@ -63,6 +63,7 @@ PRODUCT_PACKAGES += \
     android.hardware.bluetooth@1.0-service \
     libbt-vendor \
     android.hardware.wifi@1.0-service \
+    libtinycompress \
     libxml2 \
     copybit.msm8937 \
     gralloc.msm8937 \
