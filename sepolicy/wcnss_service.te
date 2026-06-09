@@ -15,4 +15,7 @@ allow wcnss_service qmuxd_socket:sock_file { create getattr read setattr unlink 
 allow wcnss_service wifi_data_file:dir create_dir_perms;
 allow wcnss_service wifi_data_file:file create_file_perms;
 r_dir_file(wcnss_service, system_file)
+r_dir_file(wcnss_service, firmware_file)
+r_dir_file(wcnss_service, persist_file)
+dontaudit wcnss_service serialno_prop:file r_file_perms;
 allow wcnss_service sysfs:file rw_file_perms;

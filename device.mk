@@ -61,6 +61,9 @@ PRODUCT_PACKAGES += \
     gatekeeper.qcom \
     android.hardware.bluetooth@1.0-impl \
     android.hardware.bluetooth@1.0-service \
+    bt_did.conf \
+    bt_stack.conf \
+    init.qcom.modem_links.sh \
     libbt-vendor \
     android.hardware.wifi@1.0-service \
     libtinycompress \
@@ -139,8 +142,7 @@ PRODUCT_COPY_FILES += \
     vendor/samsung/elitelte/proprietary/etc/firmware/a300_pfp.fw:root/firmware/image/a300_pfp.fw \
     vendor/samsung/elitelte/proprietary/etc/firmware/a300_pm4.fw:root/firmware/image/a300_pm4.fw \
     vendor/samsung/elitelte/proprietary/etc/firmware/a300_pfp.fw:system/vendor/firmware/a300_pfp.fw \
-    vendor/samsung/elitelte/proprietary/etc/firmware/a300_pm4.fw:system/vendor/firmware/a300_pm4.fw \
-    $(DEVICE_PATH)/recovery.fstab:root/etc/recovery.fstab
+    vendor/samsung/elitelte/proprietary/etc/firmware/a300_pm4.fw:system/vendor/firmware/a300_pm4.fw
 
 $(call inherit-product-if-exists, vendor/samsung/elitelte/elitelte-vendor.mk)
 

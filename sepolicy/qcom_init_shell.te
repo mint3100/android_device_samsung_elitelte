@@ -1,8 +1,11 @@
 type qcom_init_shell, domain;
 
+domain_trans(init, shell_exec, qcom_init_shell)
+
 allow qcom_init_shell shell_exec:file { entrypoint rx_file_perms };
 
 r_dir_file(qcom_init_shell, rootfs)
+r_dir_file(qcom_init_shell, firmware_file)
 r_dir_file(qcom_init_shell, system_file)
 r_dir_file(qcom_init_shell, vendor_file)
 

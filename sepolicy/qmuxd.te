@@ -10,3 +10,6 @@ allow qmuxd smd_device:chr_file rw_file_perms;
 allow qmuxd smem_log_device:chr_file rw_file_perms;
 allow qmuxd qmuxd_socket:dir create_dir_perms;
 allow qmuxd qmuxd_socket:sock_file create_file_perms;
+allow qmuxd sysfs:dir r_dir_perms;
+allow qmuxd sysfs:file rw_file_perms;
+wakelock_use(qmuxd)

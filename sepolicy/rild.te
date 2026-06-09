@@ -11,3 +11,4 @@ allow rild binder_per_mgr_service:service_manager find;
 allow rild self:socket ioctl;
 allowxperm rild self:socket ioctl { 0xc300-0xc305 };
 allow rild diag_device:chr_file rw_file_perms;
+allow rild self:capability sys_module;
