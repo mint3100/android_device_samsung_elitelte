@@ -620,8 +620,7 @@ service qmuxd /system/bin/qmuxd
 
 service pm-service /system/bin/pm-service
     class main
-    user system
-    capabilities NET_BIND_SERVICE
+    user root
     group system radio
 
 service netmgrd /system/bin/netmgrd

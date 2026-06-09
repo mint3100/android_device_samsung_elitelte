@@ -4,8 +4,8 @@ init_daemon_domain(qmuxd)
 net_domain(qmuxd)
 
 allow qmuxd self:capability { dac_override net_bind_service net_raw setgid setpcap setuid };
-allow qmuxd self:socket create_socket_perms_no_ioctl;
-allowxperm qmuxd self:socket ioctl { 0xc300-0xc3ff };
+allow qmuxd self:socket create_socket_perms;
+allowxperm qmuxd self:socket ioctl { 0xc300-0xc305 };
 allow qmuxd smd_device:chr_file rw_file_perms;
 allow qmuxd smem_log_device:chr_file rw_file_perms;
 allow qmuxd qmuxd_socket:dir create_dir_perms;

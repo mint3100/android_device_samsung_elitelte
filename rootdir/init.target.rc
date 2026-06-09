@@ -283,9 +283,8 @@ on property:init.svc.dts_configurator=stopped
 
 service per_mgr /system/bin/pm-service
     class core
-    user system
+    user root
     group system net_raw
-    capabilities NET_BIND_SERVICE
     disabled
 
 #start gpu_snapshotd for gpu hang issue debugging

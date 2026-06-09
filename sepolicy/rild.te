@@ -7,4 +7,5 @@ allow rild netmgrd_socket:sock_file { getattr read write };
 binder_call(rild, per_mgr)
 binder_call(per_mgr, rild)
 allow rild binder_per_mgr_service:service_manager find;
-allowxperm rild self:socket ioctl { 0xc300-0xc3ff };
+allow rild self:socket ioctl;
+allowxperm rild self:socket ioctl { 0xc300-0xc305 };
