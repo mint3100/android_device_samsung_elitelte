@@ -45,7 +45,6 @@ on fs
 
     mount_all /fstab.qcom
     write /proc/sys/vm/swappiness 100
-    write /sys/module/firmware_class/parameters/path /firmware-modem/image
 
     # Keep the remaining firmware/persist partitions outside fstab; a missing
     # optional partition should not block Android's fs action.
@@ -69,10 +68,11 @@ on fs
     restorecon_recursive   /efs
 
     wait /dev/block/bootdevice/by-name/apnhlos
-    mount vfat /dev/block/bootdevice/by-name/apnhlos /firmware ro context=u:object_r:system_file:s0,shortname=lower,uid=1000,gid=1000,dmask=227,fmask=337
+    mount vfat /dev/block/bootdevice/by-name/apnhlos /firmware ro context=u:object_r:firmware_file:s0,shortname=lower,uid=1000,gid=1000,dmask=227,fmask=337
 
     wait /dev/block/bootdevice/by-name/modem
-    mount vfat /dev/block/bootdevice/by-name/modem /firmware-modem ro context=u:object_r:system_file:s0,shortname=lower,uid=1000,gid=1000,dmask=227,fmask=337
+    mount vfat /dev/block/bootdevice/by-name/modem /firmware-modem ro context=u:object_r:firmware_file:s0,shortname=lower,uid=1000,gid=1000,dmask=227,fmask=337
+    write /sys/module/firmware_class/parameters/path /firmware-modem/image
     #write /sys/kernel/boot_adsp/boot 1
 
     exec -- /system/bin/rm -rf /efs/dmverity

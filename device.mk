@@ -129,6 +129,7 @@ PRODUCT_COPY_FILES += \
     $(DEVICE_PATH)/rootdir/init.qcom.usb.rc:root/init.qcom.usb.rc \
     $(DEVICE_PATH)/rootdir/init.qcom.usb.sh:root/init.qcom.usb.sh \
     $(DEVICE_PATH)/rootdir/init.recovery.qcom.rc:root/init.recovery.qcom.rc \
+    $(DEVICE_PATH)/rootdir/init.rilchip.rc:root/init.rilchip.rc \
     $(DEVICE_PATH)/rootdir/init.target.rc:root/init.target.rc \
     $(DEVICE_PATH)/rootdir/init.trace.rc:root/init.trace.rc \
     $(DEVICE_PATH)/rootdir/ueventd.qcom.rc:root/ueventd.qcom.rc \

@@ -31,6 +31,7 @@ import init.trace.rc
 import init.container.rc
 import init.target.rc
 import init.qcom.factory.rc
+import init.rilchip.rc
 
 on early-init
     mount debugfs debugfs /sys/kernel/debug

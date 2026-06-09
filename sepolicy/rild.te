@@ -1,3 +1,4 @@
+binder_use(rild)
 allow rild qmuxd_socket:dir create_dir_perms;
 unix_socket_connect(rild, qmuxd, qmuxd)
 allow rild qmuxd_socket:sock_file { create getattr read setattr unlink write };
