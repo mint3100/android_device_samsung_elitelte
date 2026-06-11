@@ -1,0 +1,11 @@
+type irsc_util, domain;
+type irsc_util_exec, exec_type, file_type;
+init_daemon_domain(irsc_util)
+net_domain(irsc_util)
+
+r_dir_file(irsc_util, system_file)
+r_dir_file(irsc_util, vendor_file)
+
+allow irsc_util self:capability { net_admin net_raw };
+allow irsc_util self:socket create_socket_perms;
+allowxperm irsc_util self:socket ioctl { 0xc300-0xc305 };

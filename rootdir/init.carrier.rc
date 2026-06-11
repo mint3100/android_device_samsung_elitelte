@@ -76,7 +76,7 @@ service swapon /sbin/sswap -s
 # permissions for bluetooth.
     setprop ro.bt.bdaddr_path "/efs/bluetooth/bt_addr"
     chown bluetooth net_bt ro.bt.bdaddr_path
-    chown radio net_bt /efs/bluetooth/bt_addr
+    chown bluetooth net_bt /efs/bluetooth/bt_addr
     chmod 0640 /efs/bluetooth/bt_addr
     chmod 0660 /sys/class/rfkill/rfkill0/state
     chown bluetooth net_bt /sys/class/rfkill/rfkill0/state

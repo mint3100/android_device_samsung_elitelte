@@ -1,0 +1,47 @@
+type sensors, domain;
+type sensors_exec, exec_type, file_type;
+
+init_daemon_domain(sensors)
+
+allow sensors self:capability {
+    chown
+    dac_override
+    dac_read_search
+    net_bind_service
+    setgid
+    setuid
+};
+dontaudit sensors self:capability { fsetid net_raw };
+
+allow sensors self:process execmem;
+allow sensors self:socket create_socket_perms;
+allowxperm sensors self:socket ioctl { 0xc300-0xc305 };
+
+allow sensors socket_device:dir rw_dir_perms;
+allow sensors sensors_socket:sock_file create_file_perms;
+type_transition sensors socket_device:sock_file sensors_socket "sensor_ctl_socket";
+
+allow sensors sensors_data_file:dir create_dir_perms;
+allow sensors sensors_data_file:file create_file_perms;
+allow sensors persist_file:dir search;
+allow sensors sensors_persist_file:dir create_dir_perms;
+allow sensors sensors_persist_file:file create_file_perms;
+
+allow sensors sensors_device:chr_file rw_file_perms;
+allow sensors smd_device:chr_file rw_file_perms;
+allow sensors smem_log_device:chr_file rw_file_perms;
+allow sensors qdsp_device:chr_file r_file_perms;
+allow sensors dsp_device:chr_file r_file_perms;
+allow sensors ion_device:chr_file r_file_perms;
+
+r_dir_file(sensors, adsprpcd_file)
+r_dir_file(sensors, firmware_file)
+r_dir_file(sensors, system_file)
+r_dir_file(sensors, vendor_file)
+
+allow sensors cgroup:dir { add_name create };
+allow sensors sysfs:dir r_dir_perms;
+allow sensors sysfs:file r_file_perms;
+allow sensors proc:file r_file_perms;
+
+wakelock_use(sensors)

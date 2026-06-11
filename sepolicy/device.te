@@ -1,5 +1,7 @@
 type diag_device, dev_type;
+type dsp_device, dev_type;
 type modem_efs_partition_device, dev_type;
+type qdsp_device, dev_type, mlstrustedobject;
 type smd_device, dev_type;
 type smem_log_device, dev_type;
 type ssd_device, dev_type;

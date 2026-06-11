@@ -13,6 +13,7 @@ unix_socket_connect(netmgrd, qmuxd, qmuxd)
 allow netmgrd qmuxd_socket:sock_file { create getattr read setattr unlink write };
 allow netmgrd netmgrd_socket:dir create_dir_perms;
 allow netmgrd netmgrd_socket:sock_file create_file_perms;
+allow netmgrd diag_device:chr_file rw_file_perms;
 allow netmgrd sysfs:file rw_file_perms;
 allow netmgrd sysfs:dir r_dir_perms;
 allow netmgrd system_file:file rx_file_perms;
