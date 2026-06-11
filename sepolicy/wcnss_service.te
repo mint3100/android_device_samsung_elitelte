@@ -17,5 +17,7 @@ allow wcnss_service wifi_data_file:file create_file_perms;
 r_dir_file(wcnss_service, system_file)
 r_dir_file(wcnss_service, firmware_file)
 r_dir_file(wcnss_service, persist_file)
+allow wcnss_service persist_file:dir rw_dir_perms;
+allow wcnss_service persist_file:file create_file_perms;
 dontaudit wcnss_service serialno_prop:file r_file_perms;
 allow wcnss_service sysfs:file rw_file_perms;

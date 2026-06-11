@@ -626,11 +626,6 @@ service qmuxd /system/bin/qmuxd
     group radio audio bluetooth gps nfc
     disabled
 
-service pm-service /system/bin/pm-service
-    class main
-    user root
-    group system radio
-
 service netmgrd /system/bin/netmgrd
     class main
     disabled

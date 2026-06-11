@@ -281,9 +281,8 @@ on property:init.svc.dts_configurator=stopped
 
 service per_mgr /system/bin/pm-service
     class core
-    user root
+    user system
     group system net_raw
-    disabled
 
 #start gpu_snapshotd for gpu hang issue debugging
 service gpu_snapshotd /system/bin/gpu_snapshotd -s /sys/class/kgsl/kgsl-3d0/snapshot -d /data/log/ -m 0700

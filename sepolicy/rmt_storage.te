@@ -9,6 +9,8 @@ allow rmt_storage {
     ssd_device
 }:blk_file rw_file_perms;
 allow rmt_storage smd_device:chr_file rw_file_perms;
+allow rmt_storage self:socket create_socket_perms;
+allowxperm rmt_storage self:socket ioctl { 0xc300-0xc305 };
 allow rmt_storage uio_device:chr_file rw_file_perms;
 allow rmt_storage debugfs_rmt:dir search;
 allow rmt_storage debugfs_rmt:file rw_file_perms;
