@@ -437,6 +437,18 @@ on property:persist.sys.ssr.enable_ramdumps=0
 
 on property:sys.boot_completed=1
     write /dev/kmsg "Boot completed "
+    chown system system /sys/class/sensors/accelerometer_sensor/enable
+    chown system system /sys/class/sensors/accelerometer_sensor/poll_delay
+    chown system system /sys/class/sensors/proximity_sensor/enable
+    chown system system /sys/class/sensors/proximity_sensor/poll_delay
+    chown system system /sys/class/sensors/sensor_dev/flush
+    chmod 0660 /sys/class/sensors/accelerometer_sensor/enable
+    chmod 0660 /sys/class/sensors/accelerometer_sensor/poll_delay
+    chmod 0660 /sys/class/sensors/proximity_sensor/enable
+    chmod 0660 /sys/class/sensors/proximity_sensor/poll_delay
+    chmod 0220 /sys/class/sensors/sensor_dev/flush
+    # Do not restart the Sensors HAL after system_server is running.
+    # SensorService aborts on the resulting HIDL DEAD_OBJECT.
 
 on property:persist.radio.atfwd.start=false
     stop atfwd

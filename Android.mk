@@ -131,6 +131,24 @@ include $(BUILD_SHARED_LIBRARY)
 LOCAL_PATH := $(DEVICE_LOCAL_PATH)
 include $(DEVICE_LOCAL_PATH)/gatekeeper/Android.mk
 
+include $(CLEAR_VARS)
+LOCAL_PATH := $(DEVICE_LOCAL_PATH)
+LOCAL_MODULE := libsec-ril-shim
+LOCAL_PROPRIETARY_MODULE := true
+LOCAL_MODULE_TAGS := optional
+LOCAL_SRC_FILES := rilshim/sec_ril_shim.cpp
+LOCAL_CFLAGS := \
+    -Wall \
+    -Wextra \
+    -Wno-unused-parameter \
+    -DRIL_SHLIB
+LOCAL_C_INCLUDES := hardware/ril/include
+LOCAL_SHARED_LIBRARIES := \
+    libcutils \
+    libdl \
+    liblog
+include $(BUILD_SHARED_LIBRARY)
+
 # Build the primary audio HAL from the Oreo Qualcomm source. The Marshmallow
 # stock blob returns -EINVAL when loaded through the Oreo audio HAL service.
 QCOM_AUDIO_HAL_ROOT := hardware/qcom/audio/default/hal

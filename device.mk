@@ -15,8 +15,15 @@ PRODUCT_PROPERTY_OVERRIDES += \
     ro.hardware.hwcomposer=msm8937 \
     ro.hardware.memtrack=msm8937 \
     ro.sf.lcd_density=240 \
+    ro.use_data_netmgrd=true \
+    ro.telephony.default_network=9 \
+    telephony.lteOnCdmaDevice=0 \
+    persist.radio.apm_sim_not_pwdn=1 \
+    persist.radio.custom_ecc=1 \
+    persist.radio.setnwkmode=9 \
+    persist.radio.sib16_support=0 \
     persist.sys.usb.config=mtp,adb \
-    rild.libpath=/vendor/lib/libsec-ril.so \
+    rild.libpath=/vendor/lib/libsec-ril-shim.so \
     debug.egl.hw=1 \
     debug.sf.hw=1 \
     debug.gralloc.enable_fb_ubwc=0 \
@@ -67,6 +74,7 @@ PRODUCT_PACKAGES += \
     init.qcom.modem_links.sh \
     libaudioroute \
     libbt-vendor \
+    libsec-ril-shim \
     android.hardware.wifi@1.0-service \
     libtinycompress \
     libxml2 \
