@@ -209,6 +209,8 @@
 /sys/devices/virtual/optical_sensors/proximity      ps_poll_delay  0660    input    system
 /sys/devices/virtual/optical_sensors/lightsensor    ls_auto        0660    input    system
 /sys/devices/virtual/optical_sensors/lightsensor    ls_poll_delay  0660    input    system
+/sys/devices/virtual/input/input*                   enable         0660    system   system
+/sys/devices/virtual/input/input*                   poll_delay     0660    system   system
 /sys/devices/virtual/input/input*                   poll           0660    input    system
 /sys/devices/virtual/input/input*                   pollrate_ms    0660    input    system
 /sys/devices/soc/78b7000.i2c/i2c-3/3-0020/input/input*    secure_touch         0440   system  drmrpc

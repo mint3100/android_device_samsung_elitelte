@@ -13,12 +13,19 @@
 #include <map>
 
 static const char kStockRilPath[] = "/vendor/lib/libsec-ril.so";
+static const int kSamsungRequestEnableUnsolResponse = 10034;
 
 static const RIL_Env* g_real_env = NULL;
 static const RIL_RadioFunctions* g_stock_functions = NULL;
 static RIL_RadioFunctions g_shim_functions;
 static pthread_mutex_t g_request_lock = PTHREAD_MUTEX_INITIALIZER;
 static std::map<RIL_Token, int> g_requests;
+static int g_enable_unsol_response_token;
+static bool g_enable_unsol_response_sent = false;
+
+static RIL_Token enable_unsol_response_token() {
+    return static_cast<RIL_Token>(&g_enable_unsol_response_token);
+}
 
 static bool property_equals(const char* key, const char* expected) {
     char value[PROPERTY_VALUE_MAX] = {};
@@ -359,6 +366,26 @@ static int normalized_call_index(int index, int fallback) {
     return fallback;
 }
 
+static bool valid_call_state(RIL_CallState state) {
+    int value = static_cast<int>(state);
+    return value >= static_cast<int>(RIL_CALL_ACTIVE) &&
+           value <= static_cast<int>(RIL_CALL_WAITING);
+}
+
+static RIL_CallState normalized_call_state(RIL_CallState state, int is_mt) {
+    if (valid_call_state(state)) {
+        return state;
+    }
+
+    int low = static_cast<int>(state) & 0xff;
+    if (low >= static_cast<int>(RIL_CALL_ACTIVE) &&
+        low <= static_cast<int>(RIL_CALL_WAITING)) {
+        return static_cast<RIL_CallState>(low);
+    }
+
+    return is_mt ? RIL_CALL_INCOMING : RIL_CALL_ACTIVE;
+}
+
 static bool send_normalized_call_list(RIL_Token token, RIL_Errno error,
                                       void* response, size_t response_len) {
     if (response == NULL || response_len % sizeof(RIL_Call*) != 0) {
@@ -388,6 +415,17 @@ static bool send_normalized_call_list(RIL_Token token, RIL_Errno error,
             fixed_calls[i].index = fixed_index;
             changed = true;
         }
+
+        RIL_CallState fixed_state =
+                normalized_call_state(fixed_calls[i].state, fixed_calls[i].isMT);
+        if (fixed_state != fixed_calls[i].state) {
+            ALOGW("Normalized Samsung call state %d to %d",
+                  static_cast<int>(fixed_calls[i].state),
+                  static_cast<int>(fixed_state));
+            fixed_calls[i].state = fixed_state;
+            changed = true;
+        }
+
         fixed_ptrs[i] = &fixed_calls[i];
     }
 
@@ -401,6 +439,11 @@ static bool send_normalized_call_list(RIL_Token token, RIL_Errno error,
 
 static void on_request_complete(RIL_Token token, RIL_Errno error,
                                 void* response, size_t response_len) {
+    if (token == enable_unsol_response_token()) {
+        ALOGI("Samsung enable-unsol-response request completed with error %d", error);
+        return;
+    }
+
     int request = take_request(token);
 
     if (error == RIL_E_SUCCESS) {
@@ -467,6 +510,24 @@ static void on_request_ack(RIL_Token token) {
     if (g_real_env->OnRequestAck != NULL) {
         g_real_env->OnRequestAck(token);
     }
+}
+
+static void enable_samsung_unsol_response(void*) {
+    if (g_stock_functions == NULL || g_stock_functions->onRequest == NULL ||
+        g_enable_unsol_response_sent) {
+        return;
+    }
+
+    g_enable_unsol_response_sent = true;
+    ALOGI("Sending Samsung enable-unsol-response request");
+
+#if defined(ANDROID_MULTI_SIM)
+    g_stock_functions->onRequest(kSamsungRequestEnableUnsolResponse, NULL, 0,
+                                 enable_unsol_response_token(), RIL_SOCKET_1);
+#else
+    g_stock_functions->onRequest(kSamsungRequestEnableUnsolResponse, NULL, 0,
+                                 enable_unsol_response_token());
+#endif
 }
 
 #if defined(ANDROID_MULTI_SIM)
@@ -547,5 +608,10 @@ extern "C" const RIL_RadioFunctions* RIL_Init(const RIL_Env* env, int argc, char
 
     ALOGI("Loaded Samsung RIL through compatibility shim, version %d",
           g_shim_functions.version);
+
+    struct timeval enable_unsol_delay = { 5, 0 };
+    g_real_env->RequestTimedCallback(enable_samsung_unsol_response, NULL,
+                                     &enable_unsol_delay);
+
     return &g_shim_functions;
 }
