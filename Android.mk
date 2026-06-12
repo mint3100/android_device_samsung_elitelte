@@ -131,6 +131,61 @@ include $(BUILD_SHARED_LIBRARY)
 LOCAL_PATH := $(DEVICE_LOCAL_PATH)
 include $(DEVICE_LOCAL_PATH)/gatekeeper/Android.mk
 
+# Build the primary audio HAL from the Oreo Qualcomm source. The Marshmallow
+# stock blob returns -EINVAL when loaded through the Oreo audio HAL service.
+QCOM_AUDIO_HAL_ROOT := hardware/qcom/audio/default/hal
+QCOM_AUDIO_PLATFORM := msm8916
+
+include $(CLEAR_VARS)
+LOCAL_PATH := $(QCOM_AUDIO_HAL_ROOT)
+LOCAL_ARM_MODE := arm
+LOCAL_MODULE := audio.primary.$(TARGET_BOARD_PLATFORM)
+LOCAL_MODULE_RELATIVE_PATH := hw
+LOCAL_MODULE_TAGS := optional
+LOCAL_MODULE_OWNER := qcom
+LOCAL_PROPRIETARY_MODULE := true
+LOCAL_CFLAGS := \
+    -DPLATFORM_MSM8916 \
+    -DMAX_TARGET_SPECIFIC_CHANNEL_CNT="2" \
+    -DKPI_OPTIMIZE_ENABLED \
+    -DHW_VARIANTS_ENABLED \
+    -Wno-missing-field-initializers \
+    -Wno-unused-parameter
+LOCAL_SRC_FILES := \
+    audio_hw.c \
+    voice.c \
+    platform_info.c \
+    audio_extn/ext_speaker.c \
+    audio_extn/audio_extn.c \
+    audio_extn/utils.c \
+    $(QCOM_AUDIO_PLATFORM)/platform.c \
+    $(QCOM_AUDIO_PLATFORM)/hw_info.c \
+    acdb.c
+LOCAL_SHARED_LIBRARIES := \
+    libaudioutils \
+    liblog \
+    libcutils \
+    libtinyalsa \
+    libtinycompress \
+    libaudioroute \
+    libdl \
+    libexpat
+LOCAL_C_INCLUDES += \
+    external/tinyalsa/include \
+    external/tinycompress/include \
+    $(call include-path-for, audio-route) \
+    $(call include-path-for, audio-effects) \
+    $(LOCAL_PATH)/$(QCOM_AUDIO_PLATFORM) \
+    $(LOCAL_PATH)/audio_extn \
+    $(LOCAL_PATH)/voice_extn \
+    external/expat/lib \
+    $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr/include
+LOCAL_HEADER_LIBRARIES += libhardware_headers
+LOCAL_ADDITIONAL_DEPENDENCIES += $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr
+include $(BUILD_SHARED_LIBRARY)
+
+LOCAL_PATH := $(DEVICE_LOCAL_PATH)
+
 # Build the Oreo CAF Qualcomm media stack for msm8937. The top-level
 # hardware/qcom/media Android.mk does not select msm8998 sources for msm8937
 # in this tree, so include the matching CAF variant from the device tree.

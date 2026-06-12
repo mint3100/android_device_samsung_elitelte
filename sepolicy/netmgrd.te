@@ -7,7 +7,10 @@ allow netmgrd self:capability { dac_override fsetid net_admin net_bind_service n
 allow netmgrd self:netlink_route_socket { bind create getattr nlmsg_read nlmsg_write read setopt write };
 allow netmgrd self:rawip_socket { create getopt setopt write };
 allow netmgrd self:socket create_socket_perms;
+allow netmgrd self:udp_socket create_socket_perms;
 allowxperm netmgrd self:socket ioctl { 0xc300-0xc305 };
+allowxperm netmgrd self:udp_socket ioctl priv_sock_ioctls;
+allowxperm netmgrd self:udp_socket ioctl { 0x89f1-0x89fd };
 allow netmgrd qmuxd_socket:dir create_dir_perms;
 unix_socket_connect(netmgrd, qmuxd, qmuxd)
 allow netmgrd qmuxd_socket:sock_file { create getattr read setattr unlink write };

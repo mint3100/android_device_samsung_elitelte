@@ -50,6 +50,7 @@ PRODUCT_PACKAGES += \
     android.hardware.audio@2.0-impl \
     android.hardware.audio@2.0-service \
     android.hardware.audio.effect@2.0-impl \
+    audio.primary.msm8937 \
     audio.a2dp.default \
     audio.r_submix.default \
     audio.usb.default \
@@ -64,6 +65,7 @@ PRODUCT_PACKAGES += \
     bt_did.conf \
     bt_stack.conf \
     init.qcom.modem_links.sh \
+    libaudioroute \
     libbt-vendor \
     android.hardware.wifi@1.0-service \
     libtinycompress \
