@@ -41,6 +41,8 @@ allow qcom_init_shell sensors_persist_file:file rw_file_perms;
 
 set_prop(qcom_init_shell, bluetooth_prop)
 set_prop(qcom_init_shell, ctl_default_prop)
+set_prop(qcom_init_shell, ctl_console_prop)
+set_prop(qcom_init_shell, debug_prop)
 set_prop(qcom_init_shell, net_radio_prop)
 set_prop(qcom_init_shell, radio_prop)
 set_prop(qcom_init_shell, system_prop)

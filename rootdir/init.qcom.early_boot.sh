@@ -196,25 +196,11 @@ case "$target" in
         esac
         ;;
     "msm8937" | "msm8940")
-        # Set ro.opengles.version based on chip id.
-        # MSM8937 and MSM8940  variants supports OpenGLES 3.1
-        # 196608 is decimal for 0x30000 to report version 3.0
-        # 196609 is decimal for 0x30001 to report version 3.1
-        case "$soc_hwid" in
-            294|295|296|297|298|313)
-                setprop ro.opengles.version 196609
-                ;;
-            *)
-                setprop ro.opengles.version 196608
-                ;;
-        esac
+        # ro.opengles.version is fixed in product properties for Lineage.
+        :
         ;;
 esac
-#set default lcd density
-#Since lcd density has read only
-#property, it will not overwrite previous set
-#property if any target is setting forcefully.
-set_density_by_fb
+# ro.sf.lcd_density is fixed in product properties for Lineage.
 
 # Setup display nodes & permissions
 # HDMI can be fb1 or fb2
@@ -296,8 +282,5 @@ fi
 boot_reason=`cat /proc/sys/kernel/boot_reason`
 reboot_reason=`getprop ro.boot.alarmboot`
 if [ "$boot_reason" = "3" ] || [ "$reboot_reason" = "true" ]; then
-    setprop ro.alarm_boot true
     setprop debug.sf.nobootanimation 1
-else
-    setprop ro.alarm_boot false
 fi
