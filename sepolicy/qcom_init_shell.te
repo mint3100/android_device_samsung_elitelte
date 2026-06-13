@@ -32,6 +32,7 @@ allow qcom_init_shell proc:file rw_file_perms;
 allow qcom_init_shell proc_net:file rw_file_perms;
 allow qcom_init_shell sysfs:dir r_dir_perms;
 allow qcom_init_shell sysfs:file rw_file_perms;
+allow qcom_init_shell sysfs_hw_platform:file r_file_perms;
 allow qcom_init_shell radio_data_file:dir create_dir_perms;
 allow qcom_init_shell radio_data_file:file create_file_perms;
 allow qcom_init_shell sensors_data_file:dir create_dir_perms;

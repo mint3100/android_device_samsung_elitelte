@@ -11,6 +11,8 @@ genfscon sysfs /devices/soc/soc:i2c@22/i2c-7/7-0030/leds/led_g u:object_r:sysfs_
 genfscon sysfs /devices/soc/soc:i2c@22/i2c-7/7-0030/leds/led_b u:object_r:sysfs_leds:s0
 genfscon sysfs /class/sec/sec_keypad u:object_r:sysfs_leds:s0
 genfscon sysfs /devices/virtual/sec/sec_keypad u:object_r:sysfs_leds:s0
+genfscon sysfs /class/sec/led u:object_r:sysfs_leds:s0
+genfscon sysfs /devices/virtual/sec/led u:object_r:sysfs_leds:s0
 genfscon sysfs /class/sec/sec_key u:object_r:sysfs_sec_key:s0
 genfscon sysfs /devices/virtual/sec/sec_key u:object_r:sysfs_sec_key:s0
 genfscon sysfs /class/sensors u:object_r:sysfs_sensors:s0

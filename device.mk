@@ -76,7 +76,7 @@ PRODUCT_PACKAGES += \
     bt_did.conf \
     bt_stack.conf \
     init.qcom.modem_links.sh \
-    libaudioroute \
+    libtinycompress \
     libbt-vendor \
     android.hardware.wifi@1.0-service \
     libxml2 \
