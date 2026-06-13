@@ -131,6 +131,33 @@ include $(BUILD_SHARED_LIBRARY)
 LOCAL_PATH := $(DEVICE_LOCAL_PATH)
 include $(DEVICE_LOCAL_PATH)/gatekeeper/Android.mk
 
+LOCAL_PATH := $(DEVICE_LOCAL_PATH)
+include $(DEVICE_LOCAL_PATH)/lights/Android.mk
+
+include $(CLEAR_VARS)
+LOCAL_PATH := $(DEVICE_LOCAL_PATH)
+LOCAL_MODULE := libqomx_core
+LOCAL_PROPRIETARY_MODULE := true
+LOCAL_MODULE_TAGS := optional
+LOCAL_SRC_FILES := qomx/libqomx_core_shim.cpp
+LOCAL_C_INCLUDES := frameworks/native/include/media/openmax
+LOCAL_SHARED_LIBRARIES := \
+    libOmxCore \
+    libdl \
+    liblog
+include $(BUILD_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_PATH := $(DEVICE_LOCAL_PATH)
+LOCAL_MODULE := libcamera_parameters_compat
+LOCAL_PROPRIETARY_MODULE := true
+LOCAL_MODULE_TAGS := optional
+LOCAL_SRC_FILES := camera_shim/camera_parameters_compat.cpp
+LOCAL_CFLAGS := \
+    -Wall \
+    -Wextra
+include $(BUILD_SHARED_LIBRARY)
+
 include $(CLEAR_VARS)
 LOCAL_PATH := $(DEVICE_LOCAL_PATH)
 LOCAL_MODULE := libsec-ril-shim

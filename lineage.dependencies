@@ -1,0 +1,12 @@
+[
+  {
+    "repository": "mint3100/android_vendor_samsung_elitelte",
+    "target_path": "vendor/samsung/elitelte",
+    "branch": "lineage-15.1"
+  },
+  {
+    "repository": "mint3100/android_kernel_samsung_msm8917_elitelte",
+    "target_path": "kernel/samsung/msm8917_elitelte",
+    "branch": "lineage-15.1"
+  }
+]

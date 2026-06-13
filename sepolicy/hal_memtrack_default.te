@@ -1,0 +1,4 @@
+r_dir_file(hal_memtrack_default, domain)
+
+allow hal_memtrack_default debugfs_kgsl_mem:dir r_dir_perms;
+allow hal_memtrack_default debugfs_kgsl_mem:file r_file_perms;

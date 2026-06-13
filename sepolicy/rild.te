@@ -11,11 +11,15 @@ allow rild binder_per_mgr_service:service_manager find;
 allow rild self:socket ioctl;
 allowxperm rild self:socket ioctl { 0xc300-0xc305 };
 allow rild diag_device:chr_file rw_file_perms;
-allow rild self:capability { chown dac_override dac_read_search fowner sys_module };
+allow rild self:capability { chown dac_override dac_read_search fowner fsetid sys_module };
 allow rild sysfs_sec_key:dir rw_dir_perms;
 allow rild sysfs_sec_key:file rw_file_perms;
+allow rild knox_kap_device:chr_file r_file_perms;
 allow rild proc_net:file rw_file_perms;
+allow rild firmware_file:dir r_dir_perms;
+allow rild firmware_file:file r_file_perms;
 set_prop(rild, net_radio_prop)
+set_prop(rild, radio_prop)
 
 allow rild radio_data_file:dir rw_dir_perms;
 allow rild radio_data_file:file create_file_perms;

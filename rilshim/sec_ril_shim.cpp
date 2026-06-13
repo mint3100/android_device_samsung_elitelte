@@ -1,5 +1,6 @@
 #define LOG_TAG "SecRilShim"
 
+#include <ctype.h>
 #include <cutils/properties.h>
 #include <dlfcn.h>
 #include <log/log.h>
@@ -22,6 +23,10 @@ static pthread_mutex_t g_request_lock = PTHREAD_MUTEX_INITIALIZER;
 static std::map<RIL_Token, int> g_requests;
 static int g_enable_unsol_response_token;
 static bool g_enable_unsol_response_sent = false;
+static pthread_mutex_t g_operator_lock = PTHREAD_MUTEX_INITIALIZER;
+static char g_operator_long[PROPERTY_VALUE_MAX];
+static char g_operator_short[PROPERTY_VALUE_MAX];
+static char g_operator_numeric[PROPERTY_VALUE_MAX];
 
 static RIL_Token enable_unsol_response_token() {
     return static_cast<RIL_Token>(&g_enable_unsol_response_token);
@@ -174,6 +179,100 @@ static bool response_is_string_array(void* response, size_t response_len, size_t
     return response != NULL && response_len == count * sizeof(char*);
 }
 
+static bool response_has_string_array(void* response, size_t response_len, size_t count) {
+    return response != NULL && response_len >= count * sizeof(char*);
+}
+
+static bool is_valid_plmn(const char* value) {
+    if (value == NULL) {
+        return false;
+    }
+
+    size_t len = strlen(value);
+    if (len != 5 && len != 6) {
+        return false;
+    }
+
+    for (size_t i = 0; i < len; ++i) {
+        if (!isdigit(static_cast<unsigned char>(value[i]))) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+static bool copy_property_plmn(const char* key, char* out, size_t out_len) {
+    char value[PROPERTY_VALUE_MAX] = {};
+    property_get(key, value, "");
+    if (!is_valid_plmn(value)) {
+        return false;
+    }
+
+    strlcpy(out, value, out_len);
+    return true;
+}
+
+static bool copy_cached_operator(char* long_name,
+                                 size_t long_name_len,
+                                 char* short_name,
+                                 size_t short_name_len,
+                                 char* numeric,
+                                 size_t numeric_len) {
+    bool valid;
+
+    pthread_mutex_lock(&g_operator_lock);
+    valid = is_valid_plmn(g_operator_numeric);
+    if (valid) {
+        strlcpy(long_name, g_operator_long, long_name_len);
+        strlcpy(short_name, g_operator_short, short_name_len);
+        strlcpy(numeric, g_operator_numeric, numeric_len);
+    }
+    pthread_mutex_unlock(&g_operator_lock);
+
+    return valid;
+}
+
+static void remember_operator(const char* long_name,
+                              const char* short_name,
+                              const char* numeric) {
+    if (!is_valid_plmn(numeric)) {
+        return;
+    }
+
+    char fixed_long[PROPERTY_VALUE_MAX] = {};
+    char fixed_short[PROPERTY_VALUE_MAX] = {};
+    strlcpy(fixed_long,
+            long_name != NULL && long_name[0] != '\0' ? long_name : numeric,
+            sizeof(fixed_long));
+    strlcpy(fixed_short,
+            short_name != NULL && short_name[0] != '\0' ? short_name : fixed_long,
+            sizeof(fixed_short));
+
+    bool changed;
+    pthread_mutex_lock(&g_operator_lock);
+    changed = strcmp(g_operator_numeric, numeric) != 0;
+    strlcpy(g_operator_long, fixed_long, sizeof(g_operator_long));
+    strlcpy(g_operator_short, fixed_short, sizeof(g_operator_short));
+    strlcpy(g_operator_numeric, numeric, sizeof(g_operator_numeric));
+    pthread_mutex_unlock(&g_operator_lock);
+
+    property_set("ril.operator.alpha", fixed_long);
+    property_set("ril.operator.numeric", numeric);
+
+    if (changed && sim_is_present() && g_real_env != NULL) {
+        ALOGI("Cached operator %s/%s and requested SIM records refresh",
+              fixed_long, numeric);
+#if defined(ANDROID_MULTI_SIM)
+        g_real_env->OnUnsolicitedResponse(RIL_UNSOL_RESPONSE_SIM_STATUS_CHANGED,
+                                          NULL, 0, RIL_SOCKET_1);
+#else
+        g_real_env->OnUnsolicitedResponse(RIL_UNSOL_RESPONSE_SIM_STATUS_CHANGED,
+                                          NULL, 0);
+#endif
+    }
+}
+
 static bool is_sms_request(int request) {
     return request == RIL_REQUEST_SEND_SMS ||
            request == RIL_REQUEST_SEND_SMS_EXPECT_MORE ||
@@ -213,65 +312,172 @@ static bool send_normalized_sms_response(RIL_Token token, void* response, size_t
     return true;
 }
 
+static bool is_samsung_oem_unsol(int unsol_response) {
+    /* Samsung framework extensions use these OEM unsolicited IDs. AOSP RILC
+     * rejects them, so drop only the IDs observed from the stock RIL. */
+    switch (unsol_response) {
+        case 11008:
+        case 11010:
+        case 11021:
+        case 11024:
+        case 11066:
+        case 20017:
+            return true;
+        default:
+            return false;
+    }
+}
+
+static bool complete_request_in_shim(int request, RIL_Token token) {
+    /* Keep Oreo framework bookkeeping requests away from the Marshmallow-era
+     * stock RIL when they are unsupported or return malformed payloads. */
+    switch (request) {
+#if defined(RIL_REQUEST_CDMA_SET_SUBSCRIPTION_SOURCE)
+        case RIL_REQUEST_CDMA_SET_SUBSCRIPTION_SOURCE:
+#endif
+#if defined(RIL_REQUEST_SET_SUPP_SVC_NOTIFICATION)
+        case RIL_REQUEST_SET_SUPP_SVC_NOTIFICATION:
+#endif
+#if defined(RIL_REQUEST_SEND_DEVICE_STATE)
+        case RIL_REQUEST_SEND_DEVICE_STATE:
+#endif
+#if defined(RIL_REQUEST_SET_UNSOLICITED_RESPONSE_FILTER)
+        case RIL_REQUEST_SET_UNSOLICITED_RESPONSE_FILTER:
+#endif
+            g_real_env->OnRequestComplete(token, RIL_E_SUCCESS, NULL, 0);
+            return true;
+
+#if defined(RIL_REQUEST_CDMA_GET_SUBSCRIPTION_SOURCE)
+        case RIL_REQUEST_CDMA_GET_SUBSCRIPTION_SOURCE: {
+            int response[1] = { 0 };
+            g_real_env->OnRequestComplete(token, RIL_E_SUCCESS, response, sizeof(response));
+            return true;
+        }
+#endif
+
+#if defined(RIL_REQUEST_START_LCE)
+        case RIL_REQUEST_START_LCE:
+#endif
+#if defined(RIL_REQUEST_STOP_LCE)
+        case RIL_REQUEST_STOP_LCE:
+#endif
+#if defined(RIL_REQUEST_PULL_LCEDATA)
+        case RIL_REQUEST_PULL_LCEDATA:
+#endif
+        {
+            int response[2] = { 0, 0 };
+            g_real_env->OnRequestComplete(token, RIL_E_REQUEST_NOT_SUPPORTED,
+                                          response, sizeof(response));
+            return true;
+        }
+
+#if defined(RIL_REQUEST_GET_HARDWARE_CONFIG)
+        case RIL_REQUEST_GET_HARDWARE_CONFIG:
+            g_real_env->OnRequestComplete(token, RIL_E_REQUEST_NOT_SUPPORTED, NULL, 0);
+            return true;
+#endif
+        default:
+            return false;
+    }
+}
+
 static void send_ims_registration_state(RIL_Token token) {
     int response[2] = { 0, RADIO_TECH_3GPP };
     ALOGW("Synthesized IMS registration state for invalid stock RIL payload");
     g_real_env->OnRequestComplete(token, RIL_E_SUCCESS, response, sizeof(response));
 }
 
-static void send_voice_registration(RIL_Token token) {
+static size_t response_string_count(void* response, size_t response_len) {
+    if (response == NULL || response_len < sizeof(char*) ||
+        response_len % sizeof(char*) != 0) {
+        return 0;
+    }
+
+    return response_len / sizeof(char*);
+}
+
+static const char* stock_string_at(char** stock,
+                                   size_t stock_count,
+                                   size_t index,
+                                   const char* fallback) {
+    if (index < stock_count && stock[index] != NULL && stock[index][0] != '\0') {
+        return stock[index];
+    }
+
+    return fallback;
+}
+
+static bool is_registered_state(const char* reg_state) {
+    return strcmp(reg_state, "1") == 0 || strcmp(reg_state, "5") == 0;
+}
+
+static void send_voice_registration(RIL_Token token,
+                                    void* response,
+                                    size_t response_len) {
+    char** stock = static_cast<char**>(response);
+    size_t stock_count = response_string_count(response, response_len);
     char rat[PROPERTY_VALUE_MAX] = {};
     property_or_default("ril.voice.rat", "3", rat, sizeof(rat));
 
-    char* response[15] = {
-        const_cast<char*>("1"),
-        const_cast<char*>(""),
-        const_cast<char*>(""),
-        rat,
-        const_cast<char*>(""),
-        const_cast<char*>(""),
-        const_cast<char*>(""),
-        const_cast<char*>("0"),
-        const_cast<char*>(""),
-        const_cast<char*>(""),
-        const_cast<char*>("-1"),
-        const_cast<char*>("-1"),
-        const_cast<char*>("-1"),
-        const_cast<char*>("0"),
-        const_cast<char*>("")
+    const char* reg_state = stock_string_at(stock, stock_count, 0, "0");
+    if (!is_registered_state(reg_state) && stock_count <= 3) {
+        strlcpy(rat, "0", sizeof(rat));
+    }
+
+    char* fixed[15] = {
+        const_cast<char*>(reg_state),
+        const_cast<char*>(stock_string_at(stock, stock_count, 1, "")),
+        const_cast<char*>(stock_string_at(stock, stock_count, 2, "")),
+        const_cast<char*>(stock_string_at(stock, stock_count, 3, rat)),
+        const_cast<char*>(stock_string_at(stock, stock_count, 4, "")),
+        const_cast<char*>(stock_string_at(stock, stock_count, 5, "")),
+        const_cast<char*>(stock_string_at(stock, stock_count, 6, "")),
+        const_cast<char*>(stock_string_at(stock, stock_count, 7, "0")),
+        const_cast<char*>(stock_string_at(stock, stock_count, 8, "")),
+        const_cast<char*>(stock_string_at(stock, stock_count, 9, "")),
+        const_cast<char*>(stock_string_at(stock, stock_count, 10, "-1")),
+        const_cast<char*>(stock_string_at(stock, stock_count, 11, "-1")),
+        const_cast<char*>(stock_string_at(stock, stock_count, 12, "-1")),
+        const_cast<char*>(stock_string_at(stock, stock_count, 13, "0")),
+        const_cast<char*>(stock_string_at(stock, stock_count, 14, ""))
     };
 
-    ALOGW("Synthesized voice registration response for invalid stock RIL payload");
-    g_real_env->OnRequestComplete(token, RIL_E_SUCCESS, response, sizeof(response));
+    ALOGW("Normalized voice registration payload len=%zu count=%zu state=%s rat=%s",
+          response_len, stock_count, fixed[0], fixed[3]);
+    g_real_env->OnRequestComplete(token, RIL_E_SUCCESS, fixed, sizeof(fixed));
 }
 
-static void send_data_registration(RIL_Token token) {
+static void send_data_registration(RIL_Token token,
+                                   void* response,
+                                   size_t response_len) {
+    char** stock = static_cast<char**>(response);
+    size_t stock_count = response_string_count(response, response_len);
     char rat[PROPERTY_VALUE_MAX] = {};
     property_get("ril.data.rat", rat, "");
     if (rat[0] == '\0') {
-        char current_system[PROPERTY_VALUE_MAX] = {};
-        char voice_rat[PROPERTY_VALUE_MAX] = {};
-        property_get("ril.currentsystem", current_system, "");
-        property_get("ril.voice.rat", voice_rat, "");
-
-        if (strcmp(current_system, "4G") == 0 || strcmp(voice_rat, "14") == 0) {
-            strlcpy(rat, "14", sizeof(rat));
-        } else {
-            strlcpy(rat, "11", sizeof(rat));
-        }
+        property_get("ril.voice.rat", rat, "");
+    }
+    if (rat[0] == '\0') {
+        strlcpy(rat, "0", sizeof(rat));
     }
 
-    char* response[6] = {
-        const_cast<char*>("1"),
-        const_cast<char*>(""),
-        const_cast<char*>(""),
-        rat,
-        const_cast<char*>("0"),
-        const_cast<char*>("1")
+    const char* reg_state = stock_string_at(stock, stock_count, 0, "0");
+    if (!is_registered_state(reg_state)) {
+        strlcpy(rat, "0", sizeof(rat));
+    }
+
+    char* fixed[6] = {
+        const_cast<char*>(reg_state),
+        const_cast<char*>(stock_string_at(stock, stock_count, 1, "")),
+        const_cast<char*>(stock_string_at(stock, stock_count, 2, "")),
+        const_cast<char*>(stock_string_at(stock, stock_count, 3, rat)),
+        const_cast<char*>(stock_string_at(stock, stock_count, 4, "0")),
+        const_cast<char*>(stock_string_at(stock, stock_count, 5, "1"))
     };
 
-    ALOGW("Synthesized data registration response for invalid stock RIL payload");
-    g_real_env->OnRequestComplete(token, RIL_E_SUCCESS, response, sizeof(response));
+    ALOGW("Normalized data registration payload len=%zu count=%zu state=%s rat=%s",
+          response_len, stock_count, fixed[0], fixed[3]);
+    g_real_env->OnRequestComplete(token, RIL_E_SUCCESS, fixed, sizeof(fixed));
 }
 
 static void fill_operator(char* long_name,
@@ -280,26 +486,31 @@ static void fill_operator(char* long_name,
                           size_t short_name_len,
                           char* numeric,
                           size_t numeric_len) {
-    property_get("gsm.operator.numeric", numeric, "");
-    if (numeric[0] == '\0') {
-        property_get("gsm.sim.operator.numeric", numeric, "");
-    }
-    if (numeric[0] == '\0' && property_equals("ril.currentplmn", "domestic")) {
-        strlcpy(numeric, "45005", numeric_len);
+    if (!copy_property_plmn("ril.operator.numeric", numeric, numeric_len) &&
+        !copy_cached_operator(long_name, long_name_len, short_name, short_name_len,
+                              numeric, numeric_len) &&
+        !copy_property_plmn("gsm.operator.numeric", numeric, numeric_len) &&
+        !copy_property_plmn("gsm.sim.operator.numeric", numeric, numeric_len)) {
+        numeric[0] = '\0';
     }
 
-    property_get("gsm.operator.alpha", long_name, "");
+    if (long_name[0] == '\0') {
+        property_get("gsm.operator.alpha", long_name, "");
+    }
+    if (long_name[0] == '\0') {
+        property_get("ril.operator.alpha", long_name, "");
+    }
     if (long_name[0] == '\0') {
         property_get("persist.radio.plmnname", long_name, "");
     }
-    if (long_name[0] == '\0' && strcmp(numeric, "45005") == 0) {
-        strlcpy(long_name, "SKTelecom", long_name_len);
+    if (long_name[0] == '\0' && numeric[0] != '\0') {
+        strlcpy(long_name, numeric, long_name_len);
     }
 
     strlcpy(short_name, long_name, short_name_len);
 }
 
-static void send_operator(RIL_Token token) {
+static void send_operator(RIL_Token token, const char* reason) {
     char long_name[PROPERTY_VALUE_MAX] = {};
     char short_name[PROPERTY_VALUE_MAX] = {};
     char numeric[PROPERTY_VALUE_MAX] = {};
@@ -307,10 +518,52 @@ static void send_operator(RIL_Token token) {
                   numeric, sizeof(numeric));
 
     char* response[3] = { long_name, short_name, numeric };
-    ALOGW("Synthesized operator response for invalid stock RIL payload");
+    if (is_valid_plmn(numeric)) {
+        remember_operator(long_name, short_name, numeric);
+    }
+    ALOGW("Synthesized operator response for %s stock RIL payload: %s/%s",
+          reason, long_name, numeric);
     g_real_env->OnRequestComplete(token, RIL_E_SUCCESS, response, sizeof(response));
 }
 
+static bool send_normalized_operator(RIL_Token token, void* response,
+                                     size_t response_len) {
+    if (response_has_string_array(response, response_len, 3)) {
+        char** stock = static_cast<char**>(response);
+        const char* long_name = stock[0] != NULL ? stock[0] : "";
+        const char* short_name = stock[1] != NULL ? stock[1] : "";
+        const char* numeric = stock[2] != NULL ? stock[2] : "";
+
+        if (is_valid_plmn(numeric)) {
+            char fixed_long[PROPERTY_VALUE_MAX] = {};
+            char fixed_short[PROPERTY_VALUE_MAX] = {};
+            char fixed_numeric[PROPERTY_VALUE_MAX] = {};
+            strlcpy(fixed_long, long_name[0] != '\0' ? long_name : numeric,
+                    sizeof(fixed_long));
+            strlcpy(fixed_short, short_name[0] != '\0' ? short_name : fixed_long,
+                    sizeof(fixed_short));
+            strlcpy(fixed_numeric, numeric, sizeof(fixed_numeric));
+
+            char* fixed[3] = { fixed_long, fixed_short, fixed_numeric };
+            remember_operator(fixed_long, fixed_short, fixed_numeric);
+            if (response_len != 3 * sizeof(char*) ||
+                long_name[0] == '\0' ||
+                short_name[0] == '\0') {
+                ALOGW("Normalized operator payload len=%zu to %s/%s",
+                      response_len, fixed_long, fixed_numeric);
+            }
+            g_real_env->OnRequestComplete(token, RIL_E_SUCCESS,
+                                          fixed, sizeof(fixed));
+            return true;
+        }
+
+        ALOGW("Rejected operator payload len=%zu numeric='%s'",
+              response_len, numeric);
+    }
+
+    send_operator(token, response == NULL ? "missing" : "invalid");
+    return true;
+}
 
 static bool build_fallback_imsi(char* imsi, size_t imsi_len) {
     if (!sim_is_present() || imsi_len < 16) {
@@ -323,15 +576,13 @@ static bool build_fallback_imsi(char* imsi, size_t imsi_len) {
     fill_operator(long_name, sizeof(long_name), short_name, sizeof(short_name),
                   numeric, sizeof(numeric));
 
-    if (strlen(numeric) < 5) {
-        strlcpy(numeric, "45005", sizeof(numeric));
-    }
-
     size_t numeric_len = strlen(numeric);
     if (numeric_len < 5 || numeric_len >= imsi_len) {
         return false;
     }
 
+    /* This is only a framework bootstrap fallback. Never invent a carrier:
+     * use a known MCC/MNC prefix or fail and let telephony retry later. */
     strlcpy(imsi, numeric, imsi_len);
     while (strlen(imsi) < 15) {
         size_t len = strlen(imsi);
@@ -469,16 +720,15 @@ static void on_request_complete(RIL_Token token, RIL_Errno error,
             return;
         } else if (request == RIL_REQUEST_VOICE_REGISTRATION_STATE &&
                    !response_is_string_array(response, response_len, 15)) {
-            send_voice_registration(token);
+            send_voice_registration(token, response, response_len);
             return;
         } else if (request == RIL_REQUEST_DATA_REGISTRATION_STATE &&
                    !response_is_string_array(response, response_len, 6) &&
                    !response_is_string_array(response, response_len, 11)) {
-            send_data_registration(token);
+            send_data_registration(token, response, response_len);
             return;
         } else if (request == RIL_REQUEST_OPERATOR &&
-                   !response_is_string_array(response, response_len, 3)) {
-            send_operator(token);
+                   send_normalized_operator(token, response, response_len)) {
             return;
         }
     } else if (request == RIL_REQUEST_GET_IMSI && sim_is_present()) {
@@ -492,10 +742,20 @@ static void on_request_complete(RIL_Token token, RIL_Errno error,
 #if defined(ANDROID_MULTI_SIM)
 static void on_unsolicited_response(int unsol_response, const void* data,
                                     size_t data_len, RIL_SOCKET_ID socket_id) {
+    if (is_samsung_oem_unsol(unsol_response)) {
+        ALOGV("Dropped Samsung OEM unsolicited response %d", unsol_response);
+        return;
+    }
+
     g_real_env->OnUnsolicitedResponse(unsol_response, data, data_len, socket_id);
 }
 #else
 static void on_unsolicited_response(int unsol_response, const void* data, size_t data_len) {
+    if (is_samsung_oem_unsol(unsol_response)) {
+        ALOGV("Dropped Samsung OEM unsolicited response %d", unsol_response);
+        return;
+    }
+
     g_real_env->OnUnsolicitedResponse(unsol_response, data, data_len);
 }
 #endif
@@ -533,11 +793,19 @@ static void enable_samsung_unsol_response(void*) {
 #if defined(ANDROID_MULTI_SIM)
 static void on_request(int request, void* data, size_t data_len,
                        RIL_Token token, RIL_SOCKET_ID socket_id) {
+    if (complete_request_in_shim(request, token)) {
+        return;
+    }
+
     remember_request(token, request);
     g_stock_functions->onRequest(request, data, data_len, token, socket_id);
 }
 #else
 static void on_request(int request, void* data, size_t data_len, RIL_Token token) {
+    if (complete_request_in_shim(request, token)) {
+        return;
+    }
+
     remember_request(token, request);
     g_stock_functions->onRequest(request, data, data_len, token);
 }
@@ -609,7 +877,7 @@ extern "C" const RIL_RadioFunctions* RIL_Init(const RIL_Env* env, int argc, char
     ALOGI("Loaded Samsung RIL through compatibility shim, version %d",
           g_shim_functions.version);
 
-    struct timeval enable_unsol_delay = { 5, 0 };
+    struct timeval enable_unsol_delay = { 0, 250000 };
     g_real_env->RequestTimedCallback(enable_samsung_unsol_response, NULL,
                                      &enable_unsol_delay);
 

@@ -55,6 +55,7 @@ TARGET_HAS_LEGACY_CAMERA_HAL1 := true
 TARGET_USES_QTI_CAMERA_DEVICE := true
 USE_DEVICE_SPECIFIC_CAMERA := true
 TARGET_USES_MEDIA_EXTENSIONS := true
+TARGET_LD_SHIM_LIBS += /system/vendor/lib/hw/camera.msm8937.so|libcamera_parameters_compat.so
 
 # Wi-Fi
 BOARD_HAS_QCOM_WLAN := true

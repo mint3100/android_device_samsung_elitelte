@@ -47,10 +47,27 @@ on boot
     chown system system /sys/class/sec/led/led_pattern
     chown system system /sys/class/sec/led/led_blink
     chown system system /sys/class/sec/led/led_lowpower
+    chown system system /sys/class/leds/led_r/brightness
+    chown system system /sys/class/leds/led_r/trigger
+    chown system system /sys/class/leds/led_r/blink
+    chown system system /sys/class/leds/led_r/delay_on
+    chown system system /sys/class/leds/led_r/delay_off
+    chown system system /sys/class/leds/led_g/brightness
+    chown system system /sys/class/leds/led_g/trigger
+    chown system system /sys/class/leds/led_g/blink
+    chown system system /sys/class/leds/led_g/delay_on
+    chown system system /sys/class/leds/led_g/delay_off
+    chown system system /sys/class/leds/led_b/brightness
+    chown system system /sys/class/leds/led_b/trigger
+    chown system system /sys/class/leds/led_b/blink
+    chown system system /sys/class/leds/led_b/delay_on
+    chown system system /sys/class/leds/led_b/delay_off
 
 # Permissions for Input Device
     chown system system /sys/class/sec/sec_keypad/brightness
     chmod 0660 /sys/class/sec/sec_keypad/brightness
+    chown root radio /sys/class/sec/sec_key/hall_irq_ctrl
+    chmod 0660 /sys/class/sec/sec_key/hall_irq_ctrl
 
 # tdmb
     chown system system /dev/tdmb

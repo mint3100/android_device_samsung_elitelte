@@ -69,11 +69,16 @@ PRODUCT_PACKAGES += \
     gatekeeper.qcom \
     android.hardware.bluetooth@1.0-impl \
     android.hardware.bluetooth@1.0-service \
+    android.hardware.camera.provider@2.4-impl \
+    android.hardware.camera.provider@2.4-service \
+    android.hardware.light@2.0-impl \
+    android.hardware.light@2.0-service \
     bt_did.conf \
     bt_stack.conf \
     init.qcom.modem_links.sh \
     libaudioroute \
     libbt-vendor \
+    libcamera_parameters_compat \
     libsec-ril-shim \
     android.hardware.wifi@1.0-service \
     libtinycompress \
@@ -81,6 +86,7 @@ PRODUCT_PACKAGES += \
     copybit.msm8937 \
     gralloc.msm8937 \
     hwcomposer.msm8937 \
+    lights.msm8937 \
     android.hardware.graphics.allocator@2.0-impl \
     android.hardware.graphics.allocator@2.0-service \
     android.hardware.graphics.mapper@2.0-impl \
@@ -159,6 +165,7 @@ $(call inherit-product-if-exists, vendor/samsung/elitelte/elitelte-vendor.mk)
 # Qualcomm CAF media stack for MSM8937 hardware codecs.
 PRODUCT_PACKAGES += \
     libOmxCore \
+    libqomx_core \
     libmm-omxcore \
     libOmxVidcCommon \
     libOmxVenc \
