@@ -34,13 +34,11 @@ TARGET_FS_CONFIG_GEN += $(DEVICE_PATH)/config.fs
 # before /system is mounted.
 BOARD_PROPERTY_OVERRIDES_SPLIT_ENABLED := false
 
-# Qualcomm display HALs are built from the LineageOS 15.1 display source
-# instead of using the Marshmallow stock hwcomposer blob.
+# Legacy Qualcomm display blobs are installed from the stock dump.
 TARGET_USES_ION := true
 TARGET_USES_C2D_COMPOSITION := true
 TARGET_USES_GRALLOC1 := false
 TARGET_USES_HWC2 := false
-MSM_VIDC_TARGET_LIST := msm8937
 BOARD_USES_ADRENO := true
 
 # Bluetooth
@@ -55,7 +53,6 @@ TARGET_HAS_LEGACY_CAMERA_HAL1 := true
 TARGET_USES_QTI_CAMERA_DEVICE := true
 USE_DEVICE_SPECIFIC_CAMERA := true
 TARGET_USES_MEDIA_EXTENSIONS := true
-TARGET_LD_SHIM_LIBS += /system/vendor/lib/hw/camera.msm8937.so|libcamera_parameters_compat.so
 
 # Wi-Fi
 BOARD_HAS_QCOM_WLAN := true

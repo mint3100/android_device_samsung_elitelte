@@ -7,10 +7,23 @@
 
 set -e
 
-cat <<'EOF'
-This device keeps a curated vendor/samsung/elitelte/elitelte-vendor.mk.
-Do not regenerate vendor makefiles with extract_utils.sh because the LineageOS
-15.1 tree needs hand-kept copy destinations for legacy vendor HALs.
+DEVICE=elitelte
+VENDOR=samsung
 
-Use ./extract-files.sh <adb|mounted-system-dir|ota.zip> to refresh blobs.
-EOF
+MY_DIR="${BASH_SOURCE%/*}"
+if [[ ! -d "${MY_DIR}" ]]; then
+    MY_DIR="${PWD}"
+fi
+
+LINEAGE_ROOT="${MY_DIR}/../../.."
+HELPER="${LINEAGE_ROOT}/vendor/lineage/build/tools/extract_utils.sh"
+
+if [[ ! -f "${HELPER}" ]]; then
+    echo "Unable to find extract_utils.sh at ${HELPER}" >&2
+    exit 1
+fi
+
+. "${HELPER}"
+
+setup_vendor "${DEVICE}" "${VENDOR}" "${LINEAGE_ROOT}" false false
+write_makefiles "${MY_DIR}/proprietary-files.txt" true

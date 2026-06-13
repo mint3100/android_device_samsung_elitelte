@@ -23,7 +23,7 @@ PRODUCT_PROPERTY_OVERRIDES += \
     persist.radio.setnwkmode=9 \
     persist.radio.sib16_support=0 \
     persist.sys.usb.config=mtp,adb \
-    rild.libpath=/vendor/lib/libsec-ril-shim.so \
+    rild.libpath=/vendor/lib/libsec-ril.so \
     debug.egl.hw=1 \
     debug.sf.hw=1 \
     debug.gralloc.enable_fb_ubwc=0 \
@@ -78,10 +78,7 @@ PRODUCT_PACKAGES += \
     init.qcom.modem_links.sh \
     libaudioroute \
     libbt-vendor \
-    libcamera_parameters_compat \
-    libsec-ril-shim \
     android.hardware.wifi@1.0-service \
-    libtinycompress \
     libxml2 \
     copybit.msm8937 \
     gralloc.msm8937 \
@@ -99,7 +96,11 @@ PRODUCT_PACKAGES += \
     libqdMetaData \
     libqdutils \
     libqservice \
+    libsdm-color \
     libsdmcore \
+    libsdm-diag \
+    libsdm-disp-apis \
+    libsdmextension \
     libsdmutils \
     memtrack.msm8937 \
     Snap \
@@ -161,15 +162,3 @@ PRODUCT_COPY_FILES += \
     vendor/samsung/elitelte/proprietary/etc/firmware/a300_pm4.fw:system/vendor/firmware/a300_pm4.fw
 
 $(call inherit-product-if-exists, vendor/samsung/elitelte/elitelte-vendor.mk)
-
-# Qualcomm CAF media stack for MSM8937 hardware codecs.
-PRODUCT_PACKAGES += \
-    libOmxCore \
-    libqomx_core \
-    libmm-omxcore \
-    libOmxVidcCommon \
-    libOmxVenc \
-    libOmxVdec \
-    libOmxSwVdec \
-    libstagefrighthw \
-    libc2dcolorconvert
