@@ -9,7 +9,6 @@ PRODUCT_PACKAGE_OVERLAYS += $(DEVICE_PATH)/overlay
 PRODUCT_PROPERTY_OVERRIDES += \
     ro.hardware=qcom \
     ro.board.platform=msm8937 \
-    ro.hardware.copybit=msm8937 \
     ro.hardware.egl=adreno \
     ro.hardware.gralloc=msm8937 \
     ro.hardware.hwcomposer=msm8937 \
@@ -78,7 +77,6 @@ PRODUCT_PACKAGES += \
     libbt-vendor \
     android.hardware.wifi@1.0-service \
     libxml2 \
-    copybit.msm8937 \
     gralloc.msm8937 \
     hwcomposer.msm8937 \
     lights.msm8937 \
@@ -90,7 +88,7 @@ PRODUCT_PACKAGES += \
     android.hardware.memtrack@1.0-impl \
     android.hardware.memtrack@1.0-service \
     android.hardware.media.omx@1.0-service \
-    libmemalloc \
+    libgrallocutils \
     libqdMetaData \
     libqdutils \
     libqservice \

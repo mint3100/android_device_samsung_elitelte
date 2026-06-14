@@ -34,12 +34,20 @@ TARGET_FS_CONFIG_GEN += $(DEVICE_PATH)/config.fs
 # before /system is mounted.
 BOARD_PROPERTY_OVERRIDES_SPLIT_ENABLED := false
 
-# Legacy Qualcomm display blobs are installed from the stock dump.
+# Use Lineage's CAF HAL path mapping for msm8937.  On 15.1 this selects the
+# msm8996 UM_3_18 display/audio/media trees while keeping this device non-Treble.
+BOARD_USES_QCOM_HARDWARE := true
+BOARD_USES_ALSA_AUDIO := true
 TARGET_USES_ION := true
-TARGET_USES_C2D_COMPOSITION := true
-TARGET_USES_GRALLOC1 := false
-TARGET_USES_HWC2 := false
+TARGET_USES_C2D_COMPOSITION := false
+TARGET_USES_GRALLOC1 := true
+TARGET_USES_HWC2 := true
 BOARD_USES_ADRENO := true
+TARGET_PROVIDES_LIBLIGHT := true
+# HWC2 uses the gralloc1 path in this CAF tree and links libgrallocutils from
+# libgralloc1. Expose the matching private headers to modules that still include
+# gralloc_priv.h directly, without modifying shared platform/display sources.
+TARGET_SPECIFIC_HEADER_PATH := hardware/qcom/display-caf/msm8996/libgralloc1
 
 # Bluetooth
 BOARD_HAVE_BLUETOOTH_QCOM := true
